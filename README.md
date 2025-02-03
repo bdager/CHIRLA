@@ -2,7 +2,7 @@
 
 The **CHIRLA** dataset (Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis) is designed for long-term person re-identification (Re-ID) in real-world scenarios. The dataset consists of multi-camera video recordings captured over seven months in an indoor office environment. This dataset aims to facilitate the development and evaluation of Re-ID algorithms capable of handling significant variations in individuals’ appearances, including changes in clothing and physical characteristics. The dataset includes 22 individuals with 963,554 bounding box annotations across 596,345 frames.
 
-![CHIRLA dataset](assets/dataset_sample.jpg?raw=true)
+![CHIRLA dataset](dataset_sample.jpg?raw=true)
 
 ## Data Generation Procedures
 
