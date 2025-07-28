@@ -1,8 +1,11 @@
 # CHIRLA: Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis
 
+[[`CHIRLA dataset`](https://doi.org/10.57760/sciencedb.20543)] [[`Paper`](https://arxiv.org/pdf/2502.06681)] [[`BibTeX`](#citation)]
+
+![CHIRLA dataset](assets/dataset_sample.jpg?raw=true)
+
 The **CHIRLA** dataset (Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis) is designed for long-term person re-identification (Re-ID) in real-world scenarios. The dataset consists of multi-camera video recordings captured over seven months in an indoor office environment. This dataset aims to facilitate the development and evaluation of Re-ID algorithms capable of handling significant variations in individuals’ appearances, including changes in clothing and physical characteristics. The dataset includes 22 individuals with 963,554 bounding box annotations across 596,345 frames.
 
-![CHIRLA dataset](dataset_sample.jpg?raw=true)
 
 ## Data Generation Procedures
 
@@ -53,3 +56,20 @@ The CHIRLA dataset is suitable for:
 ## License
 
 The dataset is publicly available under the **CC-BY** license.
+
+## Citation
+
+If you use CHIRLA dataset and benchmark, please cite the work as:
+
+```bibtex
+@article{bdager2025chirla, 
+    title={CHIRLA: Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis}, 
+    author={Dominguez-Dager, Bessie and Escalona, Felix and Gomez-Donoso, Fran and Cazorla, Miguel},  
+    journal={arXiv preprint arXiv:2502.06681}, 
+    year={2025}, 
+}
+```
+
+## Contact
+
+For any questions or support, please contact bessie.dominguez@ua.es
