@@ -6,15 +6,15 @@ It supports filtering by file types, sequences, dataset splits, and subcategorie
 
 ## Features
 
-- **Download from a list of URLs** with preserved directory structure.  
-- **Flexible filters**:
+- Download from a list of URLs with preserved directory structure.  
+- Flexible filters:
   - General: `--benchmark`, `--videos`, `--annotations`  
   - Dataset splits: `--train`, `--val`  
   - ReID: `--reid`, `--long_term`, `--multi_camera`, `--multi_camera_long_term`, `--reappearance`  
   - Tracking: `--tracking`, `--brief_occlusions`, `--multiple_people_occlusions`  
-- **Sequence filtering** with `--specific_seq` (e.g., `000`, `001`, `002`, `004`, `006`, `007`, `020`, `024`, `025`, `026`).  
-- **Skip or overwrite existing files** with `--no-skip`.  
-- Automatically **creates subdirectories** in correspondence with the input paths.
+- Sequence filtering with `--specific_seq` (e.g., `000`, `001`, `002`, `004`, `006`, `007`, `020`, `024`, `025`, `026`).  
+- Skip or overwrite existing files with `--no-skip`.  
+- Automatically creates subdirectories in correspondence with the input paths.
 
 
 ## Installation
