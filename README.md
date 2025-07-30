@@ -33,14 +33,28 @@ The dataset comprises:
 The dataset is structured as follows:
 
 ```plaintext
-videos/
-    seq_XXX/
-        camera_Y.avi  # Video files for each camera view
-annotations/
-    seq_XXX/
-        camera_Y.json  # Annotation files providing labeled bounding boxes and IDs
-benchmark/
+CHIRLA/
+├── videos/
+    ├── seq_XXX/
+        ├── camera_Y.avi  # Video files for each camera view
+├── annotations/
+    ├── seq_XXX/
+        ├── camera_Y.json  # Annotation files providing labeled bounding boxes and IDs
+└── benchmark/
+    ├── reid
+            ├── long_term
+            ├── multi_camera
+            ├── multi_camera_long_term
+            └── reappearance
+        └── tracking
+            ├── brief_occlusions
+            └── multiple_people_occlusions
 ```
+
+## CHIRLA Dataset Downloader
+
+For instructions to download the CHIRLA dataset, see [downloader/README.md](downloader/README.md).
+
 
 ## Benchmark
 Comming soon ..
