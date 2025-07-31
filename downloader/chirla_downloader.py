@@ -3,8 +3,11 @@
 import os
 import requests
 import argparse
+import urllib.parse
+
 
 ALLOWED_SEQUENCES = {"000", "001", "002", "004", "006", "007", "020", "024", "025", "026"}
+
 
 def download_files(input_file, output_dir, skip_existing=True, filters=None, seqs=None):
     os.makedirs(output_dir, exist_ok=True)
@@ -30,6 +33,9 @@ def download_files(input_file, output_dir, skip_existing=True, filters=None, seq
             continue
 
         relative_path = url.split("CHIRLA_dataset", 1)[1].lstrip("/\\")
+        # If &fileName= appears at the end, keep only the last real filename
+        if "&fileName=" in relative_path:
+            relative_path = relative_path.split("&fileName=")[0]
         output_path = os.path.join(output_dir, "CHIRLA", relative_path)
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)

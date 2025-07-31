@@ -41,14 +41,31 @@ CHIRLA/
     ├── seq_XXX/
         ├── camera_Y.json  # Annotation files providing labeled bounding boxes and IDs
 └── benchmark/
-    ├── reid
-        ├── long_term
-        ├── multi_camera
-        ├── multi_camera_long_term
-        └── reappearance
-    └── tracking
-        ├── brief_occlusions
-        └── multiple_people_occlusions
+    ├── reid/
+        ├── long_term/
+            ├── train/
+                ├── train_0/
+                   ├── seq_XXX/ 
+                ├── train_1/
+                ...
+            ├── test/
+                ├── test_0/
+                    ├── seq_YYY/ 
+                    ...
+                ├── test_1/
+                ...
+        ├── multi_camera/
+            ...
+        ├── multi_camera_long_term/
+            ...
+        └── reappearance/
+            ...
+    └── tracking/
+        ├── brief_occlusions/
+            ├── train/
+            ├── test/
+        └── multiple_people_occlusions/
+            ...
 ```
 
 ## CHIRLA Dataset Downloader

@@ -6,15 +6,15 @@ It supports filtering by file types, sequences, dataset splits, and subcategorie
 
 ## Features
 
-- Download from a list of URLs with preserved directory structure.  
-- Flexible filters:
+- **Download from a list of URLs** with preserved directory structure.  
+- **Flexible filters**:
   - General: `--benchmark`, `--videos`, `--annotations`  
   - Dataset splits: `--train`, `--val`  
   - ReID: `--reid`, `--long_term`, `--multi_camera`, `--multi_camera_long_term`, `--reappearance`  
   - Tracking: `--tracking`, `--brief_occlusions`, `--multiple_people_occlusions`  
-- Sequence filtering with `--specific_seq` (e.g., `000`, `001`, `002`, `004`, `006`, `007`, `020`, `024`, `025`, `026`).  
-- Skip or overwrite existing files with `--no-skip`.  
-- Automatically creates subdirectories in correspondence with the input paths.
+- **Sequence filtering** with `--specific_seq` (e.g., `000`, `001`, `002`, `004`, `006`, `007`, `020`, `024`, `025`, `026`).  
+- **Skip or overwrite existing files** with `--no-skip`.  
+- Automatically **creates subdirectories** in correspondence with the input paths.
 
 
 ## Installation
@@ -26,7 +26,7 @@ It supports filtering by file types, sequences, dataset splits, and subcategorie
    ```
 2. Install requirements:
    ```bash
-   pip install requests
+   pip install requeriments.txt
    ```
 
 
@@ -104,24 +104,38 @@ The output directory will preserve the CHIRLA dataset structure:
     ├── seq_000/
         ├── camera_0.avi
         ├── camera_1.avi
-        ├── ...
+        ...
     ├── seq_001/
-        ├── ...
-    ├── ...
+        ...
+    ...
 ├── annotations/
     ├── seq_000/
         ├── camera_0.json
-        ├── ...
-    ├── ...
+        ...
+    ...
 └── benchmark/
-    ├── reid
-        ├── long_term
-        ├── multi_camera
-        ├── multi_camera_long_term
-        └── reappearance
-    └── tracking
-        ├── brief_occlusions
-        └── multiple_people_occlusions
-
+    ├── reid/
+        ├── long_term/
+            ├── train/
+                ├── train_0/
+                   ├── seq_XXX/ 
+                ├── train_1/
+                ...
+            ├── test/
+                ├── test_0/
+                ├── test_1/
+                ...
+        ├── multi_camera/
+            ...
+        ├── multi_camera_long_term/
+            ...
+        └── reappearance/
+            ...
+    └── tracking/
+        ├── brief_occlusions/
+            ├── train/
+            ├── test/
+        └── multiple_people_occlusions/
+            ...
 ```
  
