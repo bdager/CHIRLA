@@ -26,7 +26,7 @@ It supports filtering by file types, sequences, dataset splits, and subcategorie
    ```
 2. Install requirements:
    ```bash
-   pip install requeriments.txt
+   pip install -r requirements.txt
    ```
 
 
