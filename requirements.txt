@@ -1,1 +1,6 @@
 requests
+h5py
+scikit-learn
+tqdm
+matplotlib
+pandas
