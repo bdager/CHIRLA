@@ -86,45 +86,25 @@ python chirla_downloader.py --input-file CHIRLA_urls.txt --output-dir ./CHIRLA_d
 
 ### 📋 Command Line Arguments
 
-| Argument | Type | Description |
-|----------|------|-------------|
-| `--input-file` | Required | Path to the `.txt` file containing dataset URLs |
-| `--output-dir` | Required | Directory to store downloaded files |
-| `--no-skip` | Flag | Force re-download files that already exist |
-
-#### Content Filters
-| Filter | Description |
-|--------|-------------|
-| `--benchmark` | Download benchmark data (ReID/tracking scenarios) |
-| `--videos` | Download raw video files |
-| `--annotations` | Download annotation files (JSON format) |
-
-#### Split Filters  
-| Filter | Description |
-|--------|-------------|
-| `--train` | Download training data splits |
-| `--val` | Download validation data splits |
-
-#### ReID Scenario Filters
-| Filter | Description |
-|--------|-------------|
-| `--reid` | Download all ReID scenarios |
-| `--long_term` | Download long-term ReID scenario |
-| `--multi_camera` | Download multi-camera ReID scenario |
-| `--multi_camera_long_term` | Download multi-camera long-term ReID scenario |
-| `--reappearance` | Download reappearance ReID scenario |
-
-#### Tracking Scenario Filters
-| Filter | Description |
-|--------|-------------|
-| `--tracking` | Download all tracking scenarios |
-| `--brief_occlusions` | Download brief occlusions tracking scenario |
-| `--multiple_people_occlusions` | Download multiple people occlusions tracking scenario |
-
-#### Sequence Filters
-| Filter | Description |
-|--------|-------------|
-| `--specific_seq [SEQ ...]` | Download only specified sequences: `000`, `001`, `002`, `004`, `006`, `007`, `020`, `024`, `025`, `026` |
+| Argument | Type | Category | Description |
+|----------|------|----------|-------------|
+| `--input-file` | Required | Core | Path to the `.txt` file containing dataset URLs |
+| `--output-dir` | Required | Core | Directory to store downloaded files |
+| `--no-skip` | Flag | Core | Force re-download files that already exist |
+| `--benchmark` | Flag | Content | Download benchmark data (ReID/tracking scenarios) |
+| `--videos` | Flag | Content | Download raw video files |
+| `--annotations` | Flag | Content | Download annotation files (JSON format) |
+| `--train` | Flag | Split | Download training data splits |
+| `--val` | Flag | Split | Download validation data splits |
+| `--reid` | Flag | ReID | Download all ReID scenarios |
+| `--long_term` | Flag | ReID | Download long-term ReID scenario |
+| `--multi_camera` | Flag | ReID | Download multi-camera ReID scenario |
+| `--multi_camera_long_term` | Flag | ReID | Download multi-camera long-term ReID scenario |
+| `--reappearance` | Flag | ReID | Download reappearance ReID scenario |
+| `--tracking` | Flag | Tracking | Download all tracking scenarios |
+| `--brief_occlusions` | Flag | Tracking | Download brief occlusions tracking scenario |
+| `--multiple_people_occlusions` | Flag | Tracking | Download multiple people occlusions tracking scenario |
+| `--specific_seq [SEQ ...]` | List | Sequence | Download only specified sequences: `000`, `001`, `002`, `004`, `006`, `007`, `020`, `024`, `025`, `026` |
 
 > **Note**: All filters use **OR logic** - a file is downloaded if it matches **any** active filter. Sequence filters are applied as an additional constraint.
 
