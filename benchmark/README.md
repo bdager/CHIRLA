@@ -4,7 +4,7 @@ The **CHIRLA (Comprehensive High-resolution Identification and Re-identification
 
 ## 📁 Benchmark Data Structure
 
-The benchmark follows a hierarchical organization:
+After downloading the benchmark data, you will find the following hierarchical organization:
 
 ```
 Benchmark/

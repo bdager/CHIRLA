@@ -74,7 +74,7 @@ For instructions to download the CHIRLA dataset, see [downloader/README.md](down
 
 
 ## Benchmark
-Comming soon ..
+We propose a benchmark with different scenarios for tracking and reidentification tasks. Please see [benchmark/README.md](benchmark/README.md) to have all the information on how to run your methods on the different challenges of the benchmark.
 
 ## Use Cases and Reusability
 
