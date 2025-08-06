@@ -4,10 +4,26 @@
 
 ![CHIRLA dataset](assets/dataset_sample.jpg?raw=true)
 
-The **CHIRLA** dataset (Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis) is designed for long-term person re-identification (Re-ID) in real-world scenarios. The dataset consists of multi-camera video recordings captured over seven months in an indoor office environment. This dataset aims to facilitate the development and evaluation of Re-ID algorithms capable of handling significant variations in individuals’ appearances, including changes in clothing and physical characteristics. The dataset includes 22 individuals with 963,554 bounding box annotations across 596,345 frames.
+The **CHIRLA** dataset (Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis) is designed for long-term person re-identification (Re-ID) in real-world scenarios. The dataset consists of multi-camera video recordings captured over **seven months** in an indoor office environment, featuring **22 individuals** with **963,554 bounding box annotations** across **596,345 frames**.
+
+This dataset aims to facilitate the development and evaluation of Re-ID algorithms capable of handling significant variations in individuals' appearances, including changes in clothing and physical characteristics over extended time periods.
 
 
-## Data Generation Procedures
+## 📊 Dataset Statistics
+
+| Metric | Value |
+|--------|-------|
+| **Duration** | 7 months |
+| **Individuals** | 22 unique persons |
+| **Cameras** | 7 multi-view cameras |
+| **Video Files** | 70 sequences |
+| **Total Frames** | 596,345 frames |
+| **Annotations** | 963,554 bounding boxes |
+| **Resolution** | 1080×720 pixels |
+| **Frame Rate** | 30 fps |
+| **Environment** | Indoor office setting |
+
+## 🎥 Data Generation Procedures
 
 The dataset was recorded at the Robotics, Vision, and Intelligent Systems Research Group headquarters at the University of Alicante, Spain. Seven strategically placed Reolink RLC-410W cameras were used to capture videos in a typical office setting, covering areas such as laboratories, hallways, and shared workspaces. Each camera features a 1/2.7" CMOS image sensor with a 5.0-megapixel resolution and an 80° horizontal field of view. The cameras were connected via Ethernet and WiFi to ensure stable streaming and synchronization.
 
@@ -17,55 +33,51 @@ A ROS-based interconnection framework was used to synchronize and retrieve image
 
 Data processing involved a semi-automatic labeling procedure:
 
-- **Detection**: YOLOv8x was used to detect individuals in video frames and extract bounding boxes.
-- **Tracking**: The Deep SORT algorithm was employed to generate tracklets and assign unique IDs to detected individuals.
-- **Manual Verification**: A custom graphical user interface (GUI) was developed to facilitate manual verification and correction of the automatically generated labels. The GUI is available in the following repository: [CHIRLA Labeling Tool](https://github.com/bdager/preid-labeling-gui).
+### 1. Automated Detection and Tracking
+- **Detection**: YOLOv8x was used to detect individuals in video frames and extract bounding boxes
+- **Tracking**: The Deep SORT algorithm was employed to generate tracklets and assign unique IDs to detected individuals
 
-Bounding boxes and IDs were assigned consistently across different cameras and sequences to maintain identity coherence.
+### 2. Manual Verification and Correction
+- **Custom GUI**: A specialized graphical user interface was developed for manual verification and correction
+- **Identity Consistency**: Bounding boxes and IDs were manually verified for consistency across different cameras and sequences
+- **Quality Control**: All annotations underwent thorough manual review to ensure accuracy
 
-## Data Structure and Format
+> 🔗 **Labeling Tool**: The custom GUI used for annotation is available at: [CHIRLA Labeling Tool](https://github.com/bdager/preid-labeling-gui)
+
+## 📁 Data Structure and Format
 
 The dataset comprises:
 
-- **Video Files**: 70 videos, each corresponding to a specific camera view in a sequence, stored in AVI format.
-- **Annotation Files**: JSON files containing frame-wise annotations, including bounding box coordinates and identity labels.
+- **Video Files**: 70 videos, each corresponding to a specific camera view in a sequence, stored in AVI format
+- **Annotation Files**: JSON files containing frame-wise annotations, including bounding box coordinates and identity labels
+- **Benchmark Data**: Processed image crops organized for ReID and tracking evaluation
 
-The dataset is structured as follows:
+### Directory Structure
 
-```plaintext
+```
 CHIRLA/
-├── videos/
-    ├── seq_XXX/
-        ├── camera_Y.avi  # Video files for each camera view
-├── annotations/
-    ├── seq_XXX/
-        ├── camera_Y.json  # Annotation files providing labeled bounding boxes and IDs
-└── benchmark/
-    ├── reid/
-        ├── long_term/
-            ├── train/
-                ├── train_0/
-                   ├── seq_XXX/ 
-                ├── train_1/
-                ...
-            ├── test/
-                ├── test_0/
-                    ├── seq_YYY/ 
-                    ...
-                ├── test_1/
-                ...
-        ├── multi_camera/
-            ...
-        ├── multi_camera_long_term/
-            ...
-        └── reappearance/
-            ...
-    └── tracking/
-        ├── brief_occlusions/
-            ├── train/
-            ├── test/
-        └── multiple_people_occlusions/
-            ...
+├── videos/                          # Raw video files
+│   └── seq_XXX/
+│       └── camera_Y.avi             # Video files for each camera view
+├── annotations/                     # Frame-level annotations
+│   └── seq_XXX/
+│       └── camera_Y.json            # Bounding boxes and IDs
+└── benchmark/                       # Processed benchmark data
+    ├── reid/                        # Person Re-Identification
+    │   ├── long_term/               # Long-term ReID scenario
+    │   │   ├── train/
+    │   │   │   ├── train_0/
+    │   │   │   │   └── seq_XXX/
+    │   │   │   └── train_1/
+    │   │   └── test/
+    │   │       ├── test_0/          # Validation subset
+    │   │       └── test_1/          # Test subset
+    │   ├── multi_camera/            # Multi-camera ReID
+    │   ├── multi_camera_long_term/  # Combined scenario
+    │   └── reappearance/            # Reappearance detection
+    └── tracking/                    # Person Tracking
+        ├── brief_occlusions/        # Short-term occlusions
+        └── multiple_people_occlusions/  # Multi-person scenarios
 ```
 
 ## CHIRLA Dataset Downloader
