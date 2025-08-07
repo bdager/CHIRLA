@@ -66,45 +66,70 @@ The tracking task focuses on maintaining consistent identity assignment over tim
 
 The benchmark provides structured metadata in CSV format for easy access and evaluation.
 
+### Enhanced Data Organization
+
+The metadata extraction script now generates multiple CSV files per scenario based on different data subsets:
+
+#### Subset-based File Generation
+
+- **Main Files** (excluding `train_0` and `test_0` subsets):
+  - **Gallery/Train Files**: For ReID scenarios, training data is saved as `reid_{scenario}_gallery.csv`
+  - **Query/Test Files**: For ReID scenarios, test data is saved as `reid_{scenario}_query.csv`
+  - **Standard Files**: For tracking scenarios, files follow the pattern `{task}_{scenario}_{split}.csv`
+
+- **Special Subset Files**:
+  - **Training Subset (`train_0`)**: Saved as `reid_{scenario}_train.csv`
+  - **Validation Subset (`test_0`)**: Saved as `reid_{scenario}_val.csv`
+
+This organization allows for:
+- **Flexible evaluation**: Use different subsets as gallery/query combinations
+- **Cross-validation**: Leverage different train/test splits
+- **Fine-tuning validation**: Use `test_0` subset for hyperparameter optimization
+
 ### Data Splits
 
-Each ReID scenario includes three data splits:
+Each ReID scenario includes multiple data files based on the subset organization:
 
-- **Training Set**: Used for training models from scratch or as gallery for evaluation
-- **Test Set**: Main evaluation set for reporting final performance metrics  
-- **Validation Set**: Derived from `test_0` subset, specifically designed for:
+- **Gallery Set** (`*_gallery.csv`): Main training data (excludes `train_0` subset) used as gallery for evaluation
+- **Query Set** (`*_query.csv`): Main test data (excludes `test_0` subset) used as queries for evaluation
+- **Training Set** (`*_train.csv`): Specific training subset (`train_0`) for model training or alternative gallery
+- **Validation Set** (`*_val.csv`): Derived from `test_0` subset, specifically designed for:
   - **Fine-tuning pre-trained models** on CHIRLA-specific characteristics
-  - **Hyperparameter optimization** without touching the test set
+  - **Hyperparameter optimization** without touching the main test set
   - **Model selection** and early stopping during adaptation
   - **Domain adaptation** from other ReID datasets to CHIRLA
 
-> ⚠️ **Important**: The validation set should be used for method development and fine-tuning, while the test set should only be used for final evaluation and comparison with other methods.
+> ⚠️ **Important**: The validation set (`*_val.csv`) should be used for method development and fine-tuning, while the main query set (`*_query.csv`) should only be used for final evaluation and comparison with other methods.
 
-### ReID Metadata
+### ReID Metadata Files
 
-| File | Description |
-|------|-------------|
-| `reid_long_term_train.csv` | Training data for long-term ReID |
-| `reid_long_term_test.csv` | Test data for long-term ReID |
-| `reid_long_term_test_val.csv` | Validation data for long-term ReID (for fine-tuning) |
-| `reid_multi_camera_train.csv` | Training data for multi-camera ReID |
-| `reid_multi_camera_test.csv` | Test data for multi-camera ReID |
-| `reid_multi_camera_test_val.csv` | Validation data for multi-camera ReID (for fine-tuning) |
-| `reid_multi_camera_long_term_train.csv` | Training data for multi-camera long-term ReID |
-| `reid_multi_camera_long_term_test.csv` | Test data for multi-camera long-term ReID |
-| `reid_multi_camera_long_term_test_val.csv` | Validation data for multi-camera long-term ReID (for fine-tuning) |
-| `reid_reappearance_train.csv` | Training data for reappearance ReID |
-| `reid_reappearance_test.csv` | Test data for reappearance ReID |
-| `reid_reappearance_test_val.csv` | Validation data for reappearance ReID (for fine-tuning) |
+| File | Description | Source Subsets |
+|------|-------------|----------------|
+| `reid_long_term_gallery.csv` | Gallery data for long-term ReID | All train subsets except `train_0` |
+| `reid_long_term_query.csv` | Query data for long-term ReID | All test subsets except `test_0` |
+| `reid_long_term_train.csv` | Training subset for long-term ReID | `train_0` subset only |
+| `reid_long_term_val.csv` | Validation data for long-term ReID | `test_0` subset only |
+| `reid_multi_camera_gallery.csv` | Gallery data for multi-camera ReID | All train subsets except `train_0` |
+| `reid_multi_camera_query.csv` | Query data for multi-camera ReID | All test subsets except `test_0` |
+| `reid_multi_camera_train.csv` | Training subset for multi-camera ReID | `train_0` subset only |
+| `reid_multi_camera_val.csv` | Validation data for multi-camera ReID | `test_0` subset only |
+| `reid_multi_camera_long_term_gallery.csv` | Gallery data for multi-camera long-term ReID | All train subsets except `train_0` |
+| `reid_multi_camera_long_term_query.csv` | Query data for multi-camera long-term ReID | All test subsets except `test_0` |
+| `reid_multi_camera_long_term_train.csv` | Training subset for multi-camera long-term ReID | `train_0` subset only |
+| `reid_multi_camera_long_term_val.csv` | Validation data for multi-camera long-term ReID | `test_0` subset only |
+| `reid_reappearance_gallery.csv` | Gallery data for reappearance ReID | All train subsets except `train_0` |
+| `reid_reappearance_query.csv` | Query data for reappearance ReID | All test subsets except `test_0` |
+| `reid_reappearance_train.csv` | Training subset for reappearance ReID | `train_0` subset only |
+| `reid_reappearance_val.csv` | Validation data for reappearance ReID | `test_0` subset only |
 
-### Tracking Metadata 
+### Tracking Metadata Files
 
-| File | Description |
-|------|-------------|
-| `tracking_brief_occlusions_train.csv` | Training data for brief occlusion tracking |
-| `tracking_brief_occlusions_test.csv` | Test data for brief occlusion tracking |
-| `tracking_multiple_people_occlusions_train.csv` | Training data for multi-person occlusion tracking |
-| `tracking_multiple_people_occlusions_test.csv` | Test data for multi-person occlusion tracking |
+| File | Description | Source Subsets |
+|------|-------------|----------------|
+| `tracking_brief_occlusions_train.csv` | Training data for brief occlusion tracking | All train subsets except `train_0` |
+| `tracking_brief_occlusions_test.csv` | Test data for brief occlusion tracking | All test subsets except `test_0` |
+| `tracking_multiple_people_occlusions_train.csv` | Training data for multi-person occlusion tracking | All train subsets except `train_0` |
+| `tracking_multiple_people_occlusions_test.csv` | Test data for multi-person occlusion tracking | All test subsets except `test_0` |
 
 ### CSV Structure
 
@@ -122,25 +147,36 @@ Each CSV file contains the following columns:
 
 ### 1. Generate Metadata
 
-Extract metadata from the raw dataset structure:
+Extract metadata from the raw dataset structure using the enhanced extraction script:
 
 ```bash
 python extract_metadata.py --root-dir data/CHIRLA/benchmark --output-dir benchmark/metadata
 ```
 
+This will generate multiple CSV files per scenario:
+- **Gallery/Query files**: Main evaluation files (e.g., `reid_long_term_gallery.csv`, `reid_long_term_query.csv`)
+- **Training files**: Specific training subsets (e.g., `reid_long_term_train.csv`)  
+- **Validation files**: For fine-tuning and development (e.g., `reid_long_term_val.csv`)
+
 ### 2. Create Embeddings
 
-Generate feature embeddings using pre-trained models:
+Generate feature embeddings using pre-trained models. You can use different CSV files based on your evaluation needs:
 
 ```bash
-# Single model evaluation
+# Example: Using gallery/query files for standard evaluation
 cd fast-reid
 python create_embeddings.py \
-    --csv ../CHIRLA/benchmark/metadata/reid_long_term_train.csv \
+    --csv ../CHIRLA/benchmark/metadata/reid_long_term_gallery.csv \
     --input ../CHIRLA/data/CHIRLA/benchmark \
     --output ../CHIRLA/benchmark/fastreid/embeddings \
     --config configs/Market1501/bagtricks_R101-ibn.yml \
     --cktp checkpoints/market_bot_R101-ibn.pth
+
+# Example: Using training subset for model training
+python create_embeddings.py \
+    --csv ../CHIRLA/benchmark/metadata/reid_long_term_train.csv \
+    --input ../CHIRLA/data/CHIRLA/benchmark \
+    --output ../CHIRLA/benchmark/fastreid/train_embeddings
 
 # Multiple models (automated)
 python ../get_embeddings.py
@@ -148,16 +184,31 @@ python ../get_embeddings.py
 
 ### 3. Run Evaluation
 
+Evaluate model performance with flexible gallery/query combinations:
+
 Evaluate model performance using standard ReID metrics:
 
 ```bash
-# Single evaluation
+# Standard evaluation (gallery vs query)
 python evaluate_reid.py \
-    --gallery embeddings/train_embeddings.h5 \
-    --query embeddings/test_embeddings.h5 \
+    --gallery embeddings/gallery_embeddings.h5 \
+    --query embeddings/query_embeddings.h5 \
     --topk 1 5 10
 
-# Batch evaluation for all models
+# Per-subset evaluation with averaging
+python evaluate_reid.py \
+    --gallery embeddings/gallery_embeddings.h5 \
+    --query embeddings/query_embeddings.h5 \
+    --topk 1 5 10 \
+    --per-subset
+
+# Cross-validation using different subset combinations
+python evaluate_reid.py \
+    --gallery embeddings/train_embeddings.h5 \
+    --query embeddings/val_embeddings.h5 \
+    --topk 1 5 10
+
+# Batch evaluation for all models and scenarios
 python run_all_evaluations.py \
     --base-dir fastreid \
     --output evaluation_results.csv
@@ -165,21 +216,23 @@ python run_all_evaluations.py \
 
 ## 📈 Evaluation Metrics
 
-The benchmark uses standard person re-identification metrics:
+The benchmark uses standard person re-identification metrics with enhanced per-subset evaluation:
 
 - **CMC (Cumulative Matching Characteristics)**: Rank-k accuracy
 - **mAP (mean Average Precision)**: Overall retrieval quality
+- **Per-subset Analysis**: Individual evaluation for each data subset
+- **Averaged Results**: Weighted and simple averages across subsets
 - **Visualization**: Top-k retrieval results for qualitative analysis
 
-### Example Output
+### Enhanced Evaluation Features
 
-```
-=== Evaluation Results ===
-CMC Rank-1: 75.23%
-CMC Rank-5: 89.45%
-CMC Rank-10: 94.12%
-mAP: 68.94%
-```
+The evaluation script now provides:
+
+1. **Per-Subset Metrics**: Individual performance for each subset (e.g., test_1, test_2, etc.)
+2. **Weighted Average**: Results weighted by the number of queries per subset
+3. **Simple Average**: Equal weight for each subset (person-level performance)
+4. **Overall Evaluation**: Traditional approach for comparison
+
 
 ## 🔧 Tools and Scripts
 
@@ -204,22 +257,21 @@ mAP: 68.94%
 
 ### Proper Use of Data Splits
 
-1. **Training Set**: Use for initial model training or as gallery for zero-shot evaluation
-2. **Validation Set**: Use for:
+1. **Gallery Set** (`*_gallery.csv`): Candidate images pool for evaluation
+2. **Query Set** (`*_query.csv`): Images query for evaluation
+3. **Training Set** (`*_train.csv`): Small subset of training images for fine-tuning purpuses
+4. **Validation Set** (`*_val.csv`): Use for:
    - Fine-tuning pre-trained models on CHIRLA characteristics
-   - Hyperparameter optimization (learning rate, augmentation, etc.)
+   - Hyperparameter optimization 
    - Model architecture selection and ablation studies
-   - Early stopping during domain adaptation
-3. **Test Set**: Use only for:
-   - Final performance reporting
-   - Comparison with other published methods
-   - Benchmark submission
 
 ### Evaluation Protocol
 
-- **Do not** use test set during model development
-- **Do not** perform hyperparameter search on test set
-- **Report** validation and test results separately
+- **Do not** use main query set (`*_query.csv`) during model development
+- **Do not** perform hyperparameter search on main test queries
+- **Use** validation set (`*_val.csv`) for all development activities
+- **Report** results on both validation and main query sets separately
+- **Use** per-subset evaluation for detailed analysis of model performance
 - **Use** the same evaluation metrics (CMC, mAP) across all splits
 
 ### Fine-tuning Guidelines
