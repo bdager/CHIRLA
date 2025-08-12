@@ -468,6 +468,11 @@ PRESETS = {
     "volo_d3": ("volo_d3_224", "VOLO_D3_teacher.pth"),
 }
 
+# Models to run with an additional higher input height (384x128)
+RESNET_MULTI_SIZE_KEYS = {
+    "resnet50", "resnet50_ibn", "resnet101", "resnet101_ibn", "resnet152", "resnet152_ibn"
+}
+
 # ----------------------------
 # Optional CLI (debug/local)
 # ----------------------------
@@ -565,36 +570,43 @@ if __name__ == "__main__":
     # Process
     ok, fail, skipped = 0, 0, 0
     for key, m, ck in selected:
-        model_out_dir = os.path.join(args.output_dir, f"CION/{key}")
-        os.makedirs(model_out_dir, exist_ok=True)
-        print(f"\n{'='*60}\nProcessing model: {key}\nOutput dir: {model_out_dir}\n{'='*60}")
+        # Determine size variants: always base size; add 384x128 variant for specified ResNet models (if different)
+        size_variants = [(args.img_h, args.img_w)]
+        if key in RESNET_MULTI_SIZE_KEYS and (args.img_h, args.img_w) != (384, 128):
+            size_variants.append((384, 128))
 
-        for csv_path in csv_list:
-            # Compute expected output path for skipping check
-            csv_base = os.path.basename(csv_path)
-            h5_name = f"{csv_base}_embeddings.h5".replace("reid_", "").replace(".csv", "")
-            h5_out = os.path.join(model_out_dir, h5_name)
-            if args.skip and os.path.isfile(h5_out):
-                print(f"⏭️  Skipping {csv_base} for model {key} — already exists: {h5_out}")
-                skipped += 1
-                continue
-            try:
-                extract_embeddings(
-                    csv_path=csv_path,
-                    input_dir=args.input_dir,
-                    output_dir=model_out_dir,
-                    model_name=m,
-                    cktp_file=ck,
-                    batch_size=args.batch_size,
-                    device=args.device,
-                    img_h=args.img_h,
-                    img_w=args.img_w,
-                    skip_existing=args.skip,
-                )
-                ok += 1
-            except Exception as e:
-                print(f"❌ Error processing {os.path.basename(csv_path)} with model {key}: {e}")
-                fail += 1
+        for (cur_h, cur_w) in size_variants:
+            size_suffix = f"_h{cur_h}" if (cur_h, cur_w) != (args.img_h, args.img_w) or len(size_variants) > 1 else ""
+            model_out_dir = os.path.join(args.output_dir, f"CION/{key}{size_suffix}")
+            os.makedirs(model_out_dir, exist_ok=True)
+            print(f"\n{'='*60}\nProcessing model: {key} (input {cur_h}x{cur_w})\nOutput dir: {model_out_dir}\n{'='*60}")
+
+            for csv_path in csv_list:
+                # Compute expected output path for skipping check
+                csv_base = os.path.basename(csv_path)
+                h5_name = f"{csv_base}_embeddings.h5".replace("reid_", "").replace(".csv", "")
+                h5_out = os.path.join(model_out_dir, h5_name)
+                if args.skip and os.path.isfile(h5_out):
+                    print(f"⏭️  Skipping {csv_base} for model {key}{size_suffix} — already exists: {h5_out}")
+                    skipped += 1
+                    continue
+                try:
+                    extract_embeddings(
+                        csv_path=csv_path,
+                        input_dir=args.input_dir,
+                        output_dir=model_out_dir,
+                        model_name=m,
+                        cktp_file=ck,
+                        batch_size=args.batch_size,
+                        device=args.device,
+                        img_h=cur_h,
+                        img_w=cur_w,
+                        skip_existing=args.skip,
+                    )
+                    ok += 1
+                except Exception as e:
+                    print(f"❌ Error processing {os.path.basename(csv_path)} with model {key}{size_suffix}: {e}")
+                    fail += 1
 
     total = ok + fail + skipped
     if total:

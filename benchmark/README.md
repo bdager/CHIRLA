@@ -281,3 +281,35 @@ When fine-tuning pre-trained ReID models:
 - Use validation set to monitor adaptation progress
 - Apply domain-specific augmentations based on CHIRLA characteristics
 - Consider temporal and multi-camera aspects during fine-tuning
+
+---
+
+## 🧩 HDF5 format and path conventions
+
+Both FastReID and Centroids-ReID exporters produce HDF5 files with the same schema:
+- Dataset `embeddings`: float32 array of shape [N, D]
+- Dataset `ids`: int32 array of shape [N]
+- Dataset `paths`: UTF-8 strings of original image paths (hierarchical), length N
+
+Notes:
+- Paths are hierarchical, e.g. `.../reid/<scenario>/<split>/<subset>/seq_xxx/imgs/<camera>/<id>/frame_xxx.png`.
+- Subset detection in evaluation parses `/test/test_k/` and `/train/train_k/` from paths.
+- Person IDs can be negative (e.g., `-1`, `-4`) and are treated as valid identities. Only an unparseable ID falls back to `-1` as a sentinel; exporters now avoid conflating a valid `-1` with parse-failure internally.
+
+## 🔄 Subset pairing in evaluation
+
+Per-subset evaluation pairs query and gallery by subset index:
+- Query subset `test_k` is evaluated against gallery subset `train_k`.
+- If a matching gallery subset is not found, the evaluator falls back to the full gallery.
+
+Tip: Use `benchmark/utils/inspect_h5.py` to list detected subsets in an H5 file.
+
+
+## ▶️ Example evaluation
+
+- Standard:
+  - `python evaluate_reid.py --gallery <gallery.h5> --query <query.h5> --topk 1 5 10`
+- Per-subset:
+  - `python evaluate_reid.py --gallery <gallery.h5> --query <query.h5> --topk 1 5 10 --per-subset`
+
+If results look off, run the sanity checks above and confirm subset pairing (`test_k` vs `train_k`), ID overlap, and absence of path duplication across query/gallery.

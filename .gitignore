@@ -1,6 +1,12 @@
 data/CHIRLA/
 
-extract_metadata.py
+# benchmark/utils/
 
 benchmark/fastreid/
 benchmark/centroids_reid/
+benchmark/CION/
+benchmark/models/
+
+benchmark/eval_results/
+
+*__pycache__/

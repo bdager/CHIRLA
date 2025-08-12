@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 import os
-import subprocess
 import argparse
-import glob
 import csv
-from pathlib import Path
+
 
 def find_h5_pairs(base_dir):
     """
-    Find all train/test H5 file pairs in the benchmark/fastreid directory.
-    Returns a list of (train_h5, test_h5, model_name, scenario) tuples.
+    Find all gallery/query H5 file pairs in the given base directory.
+    Returns a list of (gallery_h5, query_h5, model_name, scenario) tuples.
     """
     pairs = []
     
@@ -20,92 +18,86 @@ def find_h5_pairs(base_dir):
         if not h5_files:
             continue
             
-        # Group H5 files by scenario (train vs test)
-        train_files = [f for f in h5_files if 'train' in f]
-        test_files = [f for f in h5_files if 'test' in f and 'val' not in f]
+        # Group H5 files by scenario (gallery vs query)
+        gallery_files = [f for f in h5_files if 'gallery' in f]
+        query_files = [f for f in h5_files if 'query' in f and 'val' not in f]
         
         # Extract model name from directory structure
         rel_path = os.path.relpath(root, base_dir)
         model_name = rel_path.replace('/', '_') if rel_path != '.' else 'default'
         
-        # Match train and test files for the same scenario
-        for train_file in train_files:
-            train_scenario = extract_scenario_from_filename(train_file)
-            train_path = os.path.join(root, train_file)
+        # Match gallery and query files for the same scenario
+        for gallery_file in gallery_files:
+            gallery_scenario = extract_scenario_from_filename(gallery_file)
+            gallery_path = os.path.join(root, gallery_file)
             
-            for test_file in test_files:
-                test_scenario = extract_scenario_from_filename(test_file)
+            for query_file in query_files:
+                query_scenario = extract_scenario_from_filename(query_file)
                 
                 # Only pair files from the same scenario
-                if train_scenario == test_scenario:
-                    test_path = os.path.join(root, test_file)
-                    pairs.append((train_path, test_path, model_name, train_scenario))
+                if gallery_scenario == query_scenario:
+                    query_path = os.path.join(root, query_file)
+                    pairs.append((gallery_path, query_path, model_name, gallery_scenario))
     
     return pairs
+
 
 def extract_scenario_from_filename(filename):
     """
     Extract scenario name from H5 filename.
-    e.g., 'long_term_train_embeddings.h5' -> 'long_term'
+    Examples:
+      'long_term_gallery_embeddings.h5' -> 'long_term'
+      'reid_multi_camera_query_embeddings.h5' -> 'reid_multi_camera'
     """
-    # Remove common suffixes
-    name = filename.replace('_embeddings.h5', '').replace('.h5', '')
-    
-    # Remove train/test suffix
-    if name.endswith('_train'):
-        name = name[:-6]
-    elif name.endswith('_test'):
-        name = name[:-5]
-    
-    return name
+    name = filename
+    # Remove suffixes
+    if name.endswith('_embeddings.h5'):
+        name = name[:-len('_embeddings.h5')]
+    elif name.endswith('.h5'):
+        name = name[:-len('.h5')]
 
-def run_evaluation(gallery_h5, query_h5, output_file, topk=[1, 5, 10]):
+    # Remove trailing gallery/query token if present
+    parts = name.split('_')
+    if parts and parts[-1] in ('gallery', 'query'):
+        parts = parts[:-1]
+    scenario = '_'.join(parts)
+    return scenario
+
+
+def get_evaluation(gallery_h5, query_h5, topk=[1, 5, 10], per_subset=True, open_map_threshold=None):
+    """Direct evaluation using evaluate_reid functions (no subprocess).
+    Returns metrics dict similar to previous parser-based version.
     """
-    Run the evaluate_reid.py script for a specific gallery/query pair.
-    Returns the evaluation results.
-    """
-    script_path = os.path.join(os.path.dirname(__file__), 'evaluate_reid.py')
-    
-    cmd = [
-        'python', script_path,
-        '--gallery', gallery_h5,
-        '--query', query_h5,
-        '--topk'] + [str(k) for k in topk]
-    
     try:
-        # Run the evaluation script
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        
-        # Parse the output to extract metrics
-        lines = result.stdout.strip().split('\n')
-        metrics = {}
-        
-        for line in lines:
-            if 'CMC Rank-' in line:
-                parts = line.split(':')
-                rank = parts[0].split('Rank-')[1]
-                score = float(parts[1].strip().replace('%', ''))
-                metrics[f'CMC_Rank_{rank}'] = score
-            elif 'mAP:' in line:
-                score = float(line.split(':')[1].strip().replace('%', ''))
-                metrics['mAP'] = score
-        
-        print(f"✅ Evaluated: {os.path.basename(gallery_h5)} vs {os.path.basename(query_h5)}")
-        return metrics
-        
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Error evaluating {gallery_h5} vs {query_h5}: {e}")
-        print(f"Error output: {e.stderr}")
+        from evaluate_reid import (
+            run_evaluation
+        )
+    except ImportError as e:
+        print(f"❌ Failed to import evaluation utilities: {e}")
         return None
+    return run_evaluation(
+        gallery_h5=gallery_h5,
+        query_h5=query_h5,
+        topk=topk,
+        per_subset=per_subset,
+        open_map_threshold=open_map_threshold,
+        visualize=False,
+        show_logs=False,
+    )
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Run evaluation on all train/test H5 pairs in benchmark/fastreid folder")
+    parser = argparse.ArgumentParser(description="Run evaluation on all gallery/query H5 pairs in a folder")
     parser.add_argument("--base-dir", default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/fastreid",
-                        help="Base directory containing H5 files")
+                        help="Base directory containing H5 files (e.g., fastreid or CION subfolders)")
     parser.add_argument("--output", default="evaluation_results.csv",
                         help="Output CSV file for results")
     parser.add_argument("--topk", nargs="+", type=int, default=[1, 5, 10],
                         help="Top-k values for CMC evaluation")
+    parser.add_argument("--no-per-subset", action="store_true",
+                        help="Disable per-subset evaluation (use overall evaluation only)")
+    parser.add_argument("--open-map-threshold", dest="open_map_threshold", type=float, default=None,
+                        help="Similarity threshold applied to open-set mAP in evaluate_reid (forwarded to script)")
     
     args = parser.parse_args()
     
@@ -114,15 +106,16 @@ def main():
     pairs = find_h5_pairs(args.base_dir)
     
     if not pairs:
-        print("No train/test H5 file pairs found!")
+        print("No gallery/query H5 file pairs found!")
         return
     
-    print(f"Found {len(pairs)} train/test pairs to evaluate:")
+    print(f"Found {len(pairs)} gallery/query pairs to evaluate:")
     for gallery, query, model, scenario in pairs:
         print(f"  - {model}/{scenario}: {os.path.basename(gallery)} vs {os.path.basename(query)}")
     
     # Run evaluations
     results = []
+    use_per_subset = not args.no_per_subset
     
     for gallery_h5, query_h5, model_name, scenario in pairs:
         print(f"\n{'='*60}")
@@ -130,28 +123,34 @@ def main():
         print(f"Gallery: {gallery_h5}")
         print(f"Query: {query_h5}")
         print(f"{'='*60}")
-        
-        metrics = run_evaluation(gallery_h5, query_h5, None, args.topk)
-        
+        metrics = get_evaluation(
+            gallery_h5, query_h5, args.topk, per_subset=use_per_subset, open_map_threshold=args.open_map_threshold
+        )
+        filter_metrics = {}
         if metrics:
+            # metrics['cmc_scores'] is an array aligned with args.topk
+            for k, score in zip(args.topk, metrics['cmc_scores']):
+                filter_metrics[f"CMC@{k}"] = round(float(score) * 100, 2)
+            filter_metrics["mAP"] = round(float(metrics['mAP']) * 100, 2)
             result_row = {
                 'model': model_name,
                 'scenario': scenario,
                 'gallery_file': os.path.basename(gallery_h5),
                 'query_file': os.path.basename(query_h5),
-                **metrics
+                # 'per_subset': use_per_subset,
+                # 'mode': 'per_subset' if use_per_subset else 'overall',
+                # 'open_map_threshold': args.open_map_threshold if args.open_map_threshold is not None else '',
+                **filter_metrics
             }
             results.append(result_row)
     
     # Save results to CSV
     if results:
-        # Write CSV file manually
         with open(args.output, 'w', newline='') as csvfile:
-            if results:
-                fieldnames = list(results[0].keys())
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(results)
+            fieldnames = list(results[0].keys())
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(results)
         
         print(f"\n✅ Saved evaluation results to: {args.output}")
         
@@ -160,36 +159,32 @@ def main():
         print("EVALUATION SUMMARY")
         print(f"{'='*80}")
         
-        # Print header
-        if results:
-            fieldnames = list(results[0].keys())
-            header = " | ".join([f"{name:15}" for name in fieldnames])
-            print(header)
-            print("-" * len(header))
-            
-            # Print each result row
-            for result in results:
-                row = " | ".join([f"{str(result[field]):15}" for field in fieldnames])
-                print(row)
+        fieldnames = list(results[0].keys())
+        header = " | ".join([f"{name:15}" for name in fieldnames])
+        print(header)
+        print("-" * len(header))
         
-        # Print best performing models per scenario
+        for result in results:
+            row = " | ".join([f"{str(result[field]):15}" for field in fieldnames])
+            print(row)
+        
+        # Print best performing models per scenario using the primary (Simple/Weighted/Overall) mAP
         print(f"\n{'='*80}")
         print("BEST PERFORMING MODELS PER SCENARIO")
         print(f"{'='*80}")
-        
-        # Group results by scenario and find best mAP
         scenarios = {}
         for result in results:
-            scenario = result['scenario']
-            if scenario not in scenarios or result.get('mAP', 0) > scenarios[scenario].get('mAP', 0):
-                scenarios[scenario] = result
-        
+            map_value = result.get('mAP') or 0
+            scenario_key = result['scenario']
+            if scenario_key not in scenarios or map_value > (scenarios[scenario_key].get('mAP') or 0):
+                scenarios[scenario_key] = result
         for scenario, best_result in scenarios.items():
-            mAP = best_result.get('mAP', 0)
+            mAP = best_result.get('mAP') or 0
             model = best_result.get('model', 'Unknown')
             print(f"{scenario}: {model} (mAP: {mAP:.2f}%)")
     else:
         print("No successful evaluations completed.")
+
 
 if __name__ == "__main__":
     main()
