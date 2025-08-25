@@ -1,0 +1,1 @@
+python benchmark/tracking/gt_to_MOT.py --output_dir benchmark/tracking/data/gt

@@ -2,11 +2,14 @@ data/CHIRLA/
 
 # benchmark/utils/
 
-benchmark/fastreid/
-benchmark/centroids_reid/
-benchmark/CION/
-benchmark/models/
+benchmark/reid/eval_results/
+benchmark/reid/embeddings/
+benchmark/reid/models/
 
-benchmark/eval_results/
+benchmark/tracking/models/
+benchmark/tracking/TrackEval/
+benchmark/tracking/data/
+
+benchmark/extract_metadata.py
 
 *__pycache__/
