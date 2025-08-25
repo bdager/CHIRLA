@@ -10,6 +10,6 @@ benchmark/tracking/models/
 benchmark/tracking/TrackEval/
 benchmark/tracking/data/
 
-benchmark/extract_metadata.py
+# benchmark/extract_metadata.py
 
 *__pycache__/
