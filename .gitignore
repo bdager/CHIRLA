@@ -7,7 +7,7 @@ benchmark/reid/embeddings/
 benchmark/reid/models/
 
 benchmark/tracking/models/
-benchmark/tracking/TrackEval/
+# benchmark/tracking/TrackEval/
 benchmark/tracking/data/
 
 # benchmark/extract_metadata.py

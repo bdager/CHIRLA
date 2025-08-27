@@ -106,9 +106,16 @@ def main(args):
             continue
         try:
             data = read_json_file(jp)
+            # Original JSON may have trailing empty frames (no detections). We want seqLength to reflect
+            # the true last frame index present in the annotation JSON keys, not just the last frame
+            # that contains a detection written to gt.txt.
+            try:
+                orig_max_frame = max(int(k) for k in data.keys()) if data else 0
+            except Exception:
+                orig_max_frame = 0
             convert_to_txt(data, gt_path)
-            # determine max frame from written file
-            max_f = 0
+            # We still compute max frame with detections (for diagnostics only)
+            det_max_frame = 0
             with open(gt_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     line = line.strip()
@@ -116,14 +123,16 @@ def main(args):
                         continue
                     try:
                         fr = int(line.split(',')[0])
-                        if fr > max_f:
-                            max_f = fr
+                        if fr > det_max_frame:
+                            det_max_frame = fr
                     except Exception:
                         continue
-            split_seq_frames[split][seq_name] = max(split_seq_frames[split].get(seq_name, 0), max_f)
+            # Store the original maximum frame index (may be > det_max_frame if trailing empty frames exist)
+            seq_len = orig_max_frame
+            split_seq_frames[split][seq_name] = max(split_seq_frames[split].get(seq_name, 0), seq_len)
             converted += 1
             if args.verbose:
-                print(f'[ok] ({split}) {jp} -> {gt_path} (max_frame={max_f})')
+                print(f'[ok] ({split}) {jp} -> {gt_path} (seqLength(orig_json_max)={seq_len} det_max={det_max_frame})')
         except Exception as e:
             errors += 1
             print(f'[err] Failed {jp}: {e}')
