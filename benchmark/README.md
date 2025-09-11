@@ -17,9 +17,12 @@ Benchmark/
 │   │   │   │   │   │   ├── Camera (camera_X_timestamp)
 │   │   │   │   │   │   │   ├── ID (person identifier)
 │   │   │   │   │   │   │   │   └── Images (frame_XXXX.png)
+|   |   |   |   |   └── camera_X_timestamp.json            
 ```
 
-### Example Path Structure
+>  Tracking scenarios do not contain **Subsets** for train or test splits.
+
+#### Example Path Structure
 ```
 reid/long_term/seq_024/imgs/camera_6_2023-12-01-11:05:52/<ID>/frame_XXXX.png
 ```
@@ -32,21 +35,22 @@ The ReID task focuses on matching person identities across different cameras and
 
 #### Scenarios:
 
-1. **Long-term ReID** (`long_term`)
-   - Matching individuals across extended time periods
-   - Challenges: appearance changes, lighting variations
+1. **Reappearance ReID** (`reappearance`)
+   - Detecting when a person reappears after absence.
+   - The person leaves the field of view of a camera and returns to the scene after a time interval. This reappearance can also include a change in the person appearance (e.g., takes off or puts on a jacket, wears a hat or changes an accessory). The objective of this scenario is to assess the ability of the system to re-identify the person correctly after a break in visibility.
 
-2. **Multi-camera ReID** (`multi_camera`) 
-   - Cross-camera person matching at similar timestamps
-   - Challenges: viewpoint variations, camera differences
+2. **Long-term ReID** (`long_term`)
+   - Matching individuals across extended time periods.
+   - The person is seen in different recordings captured on different days, implying possible changes in appearance and environment. The objective of this scenario is to evaluate the system’s ability to recognize a person when recordings come from different days, with potential variations in lighting, appearance and other contextual factors.
 
-3. **Multi-camera Long-term ReID** (`multi_camera_long_term`)
-   - Combined challenges of multiple cameras and time gaps
-   - Most challenging scenario
+3. **Multi-camera ReID** (`multi_camera`) 
+   - Cross-camera person matching at similar timestamps.
+   - The person is captured by several cameras at different locations, with little or no overlap between the fields of view of the cameras. The objective of this scenario is to assess the system’s ability to re-identify the person when viewed from different angles and perspectives.
 
-4. **Reappearance ReID** (`reappearance`)
-   - Detecting when a person reappears after absence
-   - Challenges: clothing changes, temporal gaps
+4. **Multi-camera Long-term ReID** (`multi_camera_long_term`)
+   - Combined challenges of multiple cameras and long term re-id.
+   - The person is captured by several cameras at different locations and days. The objective of this scenario is to evaluate the system’s robustness in re-identifying the person from various angles and perspectives, ensuring reliable performance under diverse temporal and contextual conditions.
+
 
 ### Person Tracking
 
@@ -55,261 +59,46 @@ The tracking task focuses on maintaining consistent identity assignment over tim
 #### Scenarios:
 
 1. **Brief Occlusions** (`brief_occlusions`)
-   - Tracking through short-term occlusions
-   - Challenges: partial visibility, motion blur
+   - Tracking through short-term occlusions.
+   - The person is totally hidden by an object or another person for a short period of time and becomes visible again without having left the scene. The objective of this scenario is to assess the ability of the system to maintain the ID and tracking of a person after a brief occlusion.
 
 2. **Multiple People Occlusions** (`multiple_people_occlusions`)
-   - Tracking in crowded scenes with person-to-person occlusions
-   - Challenges: identity switches, group interactions
+   - Tracking in crowded scenes with person-to-person occlusions.
+   - The scene includes several people, some of whom cross each other or are hidden, creating frequent occlusions. The objective of this scenario is to evaluate the system’s ability to track multiple people simultaneously, even in situations where occlusions arise from their interactions.
+
 
 ## 📊 Metadata Files
 
 The benchmark provides structured metadata in CSV format for easy access and evaluation.
+All scenario metadata CSVs are in the [`metadata/`](metadata) directory, with detailed per-file descriptions in [`metadata/README.md`](metadata/README.md). 
 
-### Enhanced Data Organization
+### Re-ID CSV Files
 
-The metadata extraction script now generates multiple CSV files per scenario based on different data subsets:
+| File       | Subset basis          | Filename pattern           | Typical use                           |
+|------------|----------------------|----------------------------|---------------------------------------|
+| Gallery    | Train (excl. `train_0`) | `reid_{scenario}_gallery.csv` | Feature extraction + gallery index     |
+| Query      | Test (excl. `test_0`)   | `reid_{scenario}_query.csv`   | Final evaluation queries               |
+| Training   | `train_0` only          | `reid_{scenario}_train.csv`   | Fine-tuning / model adjustment           |
+| Validation | `test_0` only           | `reid_{scenario}_val.csv`     | Hyper-parameter tuning  |
 
-#### Subset-based File Generation
+Where `{scenario}` ∈ {`reappearance`, `long_term`, `multi_camera`, `multi_camera_long_term`}.
 
-- **Main Files** (excluding `train_0` and `test_0` subsets):
-  - **Gallery/Train Files**: For ReID scenarios, training data is saved as `reid_{scenario}_gallery.csv`
-  - **Query/Test Files**: For ReID scenarios, test data is saved as `reid_{scenario}_query.csv`
-  - **Standard Files**: For tracking scenarios, files follow the pattern `{task}_{scenario}_{split}.csv`
+> ⚠️ **Important**: The validation set (`*_val.csv`) is for method development and fine-tuning.  The query set (`*_query.csv`) should be reserved for final evaluation and fair comparison.
 
-- **Special Subset Files**:
-  - **Training Subset (`train_0`)**: Saved as `reid_{scenario}_train.csv`
-  - **Validation Subset (`test_0`)**: Saved as `reid_{scenario}_val.csv`
 
-This organization allows for:
-- **Flexible evaluation**: Use different subsets as gallery/query combinations
-- **Cross-validation**: Leverage different train/test splits
-- **Fine-tuning validation**: Use `test_0` subset for hyperparameter optimization
+### Tracking CSV Files
 
-### Data Splits
+Tracking scenarios do not use **subset** splits. Each split has one file:
 
-Each ReID scenario includes multiple data files based on the subset organization:
-
-- **Gallery Set** (`*_gallery.csv`): Main training data (excludes `train_0` subset) used as gallery for evaluation
-- **Query Set** (`*_query.csv`): Main test data (excludes `test_0` subset) used as queries for evaluation
-- **Training Set** (`*_train.csv`): Specific training subset (`train_0`) for model training or alternative gallery
-- **Validation Set** (`*_val.csv`): Derived from `test_0` subset, specifically designed for:
-  - **Fine-tuning pre-trained models** on CHIRLA-specific characteristics
-  - **Hyperparameter optimization** without touching the main test set
-  - **Model selection** and early stopping during adaptation
-  - **Domain adaptation** from other ReID datasets to CHIRLA
-
-> ⚠️ **Important**: The validation set (`*_val.csv`) should be used for method development and fine-tuning, while the main query set (`*_query.csv`) should only be used for final evaluation and comparison with other methods.
-
-### ReID Metadata Files
-
-| File | Description | Source Subsets |
-|------|-------------|----------------|
-| `reid_long_term_gallery.csv` | Gallery data for long-term ReID | All train subsets except `train_0` |
-| `reid_long_term_query.csv` | Query data for long-term ReID | All test subsets except `test_0` |
-| `reid_long_term_train.csv` | Training subset for long-term ReID | `train_0` subset only |
-| `reid_long_term_val.csv` | Validation data for long-term ReID | `test_0` subset only |
-| `reid_multi_camera_gallery.csv` | Gallery data for multi-camera ReID | All train subsets except `train_0` |
-| `reid_multi_camera_query.csv` | Query data for multi-camera ReID | All test subsets except `test_0` |
-| `reid_multi_camera_train.csv` | Training subset for multi-camera ReID | `train_0` subset only |
-| `reid_multi_camera_val.csv` | Validation data for multi-camera ReID | `test_0` subset only |
-| `reid_multi_camera_long_term_gallery.csv` | Gallery data for multi-camera long-term ReID | All train subsets except `train_0` |
-| `reid_multi_camera_long_term_query.csv` | Query data for multi-camera long-term ReID | All test subsets except `test_0` |
-| `reid_multi_camera_long_term_train.csv` | Training subset for multi-camera long-term ReID | `train_0` subset only |
-| `reid_multi_camera_long_term_val.csv` | Validation data for multi-camera long-term ReID | `test_0` subset only |
-| `reid_reappearance_gallery.csv` | Gallery data for reappearance ReID | All train subsets except `train_0` |
-| `reid_reappearance_query.csv` | Query data for reappearance ReID | All test subsets except `test_0` |
-| `reid_reappearance_train.csv` | Training subset for reappearance ReID | `train_0` subset only |
-| `reid_reappearance_val.csv` | Validation data for reappearance ReID | `test_0` subset only |
-
-### Tracking Metadata Files
-
-| File | Description | Source Subsets |
-|------|-------------|----------------|
-| `tracking_brief_occlusions_train.csv` | Training data for brief occlusion tracking | All train subsets except `train_0` |
-| `tracking_brief_occlusions_test.csv` | Test data for brief occlusion tracking | All test subsets except `test_0` |
-| `tracking_multiple_people_occlusions_train.csv` | Training data for multi-person occlusion tracking | All train subsets except `train_0` |
-| `tracking_multiple_people_occlusions_test.csv` | Test data for multi-person occlusion tracking | All test subsets except `test_0` |
-
-### CSV Structure
-
-Each CSV file contains the following columns:
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `image_path` | string | Relative path to the image file |
-| `id` | integer | Person identifier (positive or negative) |
-| `camera` | string | Camera identifier with timestamp |
-| `sequence` | string | Sequence identifier (e.g., seq_024) |
-| `subset` | string | Data subset (train_0, test_0, etc.) |
-
-## 🚀 Getting Started
-
-### 1. Generate Metadata
-
-Extract metadata from the raw dataset structure using the enhanced extraction script:
-
-```bash
-python extract_metadata.py --root-dir data/CHIRLA/benchmark --output-dir benchmark/metadata
+```
+tracking_{scenario}_{split}.csv
 ```
 
-This will generate multiple CSV files per scenario:
-- **Gallery/Query files**: Main evaluation files (e.g., `reid_long_term_gallery.csv`, `reid_long_term_query.csv`)
-- **Training files**: Specific training subsets (e.g., `reid_long_term_train.csv`)  
-- **Validation files**: For fine-tuning and development (e.g., `reid_long_term_val.csv`)
-
-### 2. Create Embeddings
-
-Generate feature embeddings using pre-trained models. You can use different CSV files based on your evaluation needs:
-
-```bash
-# Example: Using gallery/query files for standard evaluation
-cd fast-reid
-python create_embeddings.py \
-    --csv ../CHIRLA/benchmark/metadata/reid_long_term_gallery.csv \
-    --input ../CHIRLA/data/CHIRLA/benchmark \
-    --output ../CHIRLA/benchmark/fastreid/embeddings \
-    --config configs/Market1501/bagtricks_R101-ibn.yml \
-    --cktp checkpoints/market_bot_R101-ibn.pth
-
-# Example: Using training subset for model training
-python create_embeddings.py \
-    --csv ../CHIRLA/benchmark/metadata/reid_long_term_train.csv \
-    --input ../CHIRLA/data/CHIRLA/benchmark \
-    --output ../CHIRLA/benchmark/fastreid/train_embeddings
-
-# Multiple models (automated)
-python ../get_embeddings.py
-```
-
-### 3. Run Evaluation
-
-Evaluate model performance with flexible gallery/query combinations:
-
-Evaluate model performance using standard ReID metrics:
-
-```bash
-# Standard evaluation (gallery vs query)
-python evaluate_reid.py \
-    --gallery embeddings/gallery_embeddings.h5 \
-    --query embeddings/query_embeddings.h5 \
-    --topk 1 5 10
-
-# Per-subset evaluation with averaging
-python evaluate_reid.py \
-    --gallery embeddings/gallery_embeddings.h5 \
-    --query embeddings/query_embeddings.h5 \
-    --topk 1 5 10 \
-    --per-subset
-
-# Cross-validation using different subset combinations
-python evaluate_reid.py \
-    --gallery embeddings/train_embeddings.h5 \
-    --query embeddings/val_embeddings.h5 \
-    --topk 1 5 10
-
-# Batch evaluation for all models and scenarios
-python run_all_evaluations.py \
-    --base-dir fastreid \
-    --output evaluation_results.csv
-```
-
-## 📈 Evaluation Metrics
-
-The benchmark uses standard person re-identification metrics with enhanced per-subset evaluation:
-
-- **CMC (Cumulative Matching Characteristics)**: Rank-k accuracy
-- **mAP (mean Average Precision)**: Overall retrieval quality
-- **Per-subset Analysis**: Individual evaluation for each data subset
-- **Averaged Results**: Weighted and simple averages across subsets
-- **Visualization**: Top-k retrieval results for qualitative analysis
-
-### Enhanced Evaluation Features
-
-The evaluation script now provides:
-
-1. **Per-Subset Metrics**: Individual performance for each subset (e.g., test_1, test_2, etc.)
-2. **Weighted Average**: Results weighted by the number of queries per subset
-3. **Simple Average**: Equal weight for each subset (person-level performance)
-4. **Overall Evaluation**: Traditional approach for comparison
+Examples:  
+- `tracking_brief_occlusions_test.csv`  
+- `tracking_multiple_people_occlusions_train.csv`
 
 
-## 🔧 Tools and Scripts
+## Evaluation Protocol
 
-| Script | Purpose |
-|--------|---------|
-| `extract_metadata.py` | Generate CSV metadata from dataset structure |
-| `create_embeddings.py` | Extract feature embeddings using ReID models |
-| `evaluate_reid.py` | Compute ReID evaluation metrics |
-| `run_all_evaluations.py` | Batch evaluation across all model/scenario combinations |
-| `get_embeddings.py` | Automated embedding generation for multiple models |
-
-
-## 🏆 Benchmark Characteristics
-
-- **Scale**: Thousands of identities across multiple scenarios
-- **Temporal Range**: From minutes to months between appearances
-- **Camera Diversity**: Multiple viewpoints and lighting conditions  
-- **Real-world Challenges**: Clothing changes, pose variations, occlusions
-- **Evaluation Rigor**: Standardized protocols for fair comparison
-
-## 📝 Best Practices
-
-### Proper Use of Data Splits
-
-1. **Gallery Set** (`*_gallery.csv`): Candidate images pool for evaluation
-2. **Query Set** (`*_query.csv`): Images query for evaluation
-3. **Training Set** (`*_train.csv`): Small subset of training images for fine-tuning purpuses
-4. **Validation Set** (`*_val.csv`): Use for:
-   - Fine-tuning pre-trained models on CHIRLA characteristics
-   - Hyperparameter optimization 
-   - Model architecture selection and ablation studies
-
-### Evaluation Protocol
-
-- **Do not** use main query set (`*_query.csv`) during model development
-- **Do not** perform hyperparameter search on main test queries
-- **Use** validation set (`*_val.csv`) for all development activities
-- **Report** results on both validation and main query sets separately
-- **Use** per-subset evaluation for detailed analysis of model performance
-- **Use** the same evaluation metrics (CMC, mAP) across all splits
-
-### Fine-tuning Guidelines
-
-When fine-tuning pre-trained ReID models:
-- Start with models trained on large-scale datasets (Market1501, MSMT17, etc.)
-- Use validation set to monitor adaptation progress
-- Apply domain-specific augmentations based on CHIRLA characteristics
-- Consider temporal and multi-camera aspects during fine-tuning
-
----
-
-## 🧩 HDF5 format and path conventions
-
-Both FastReID and Centroids-ReID exporters produce HDF5 files with the same schema:
-- Dataset `embeddings`: float32 array of shape [N, D]
-- Dataset `ids`: int32 array of shape [N]
-- Dataset `paths`: UTF-8 strings of original image paths (hierarchical), length N
-
-Notes:
-- Paths are hierarchical, e.g. `.../reid/<scenario>/<split>/<subset>/seq_xxx/imgs/<camera>/<id>/frame_xxx.png`.
-- Subset detection in evaluation parses `/test/test_k/` and `/train/train_k/` from paths.
-- Person IDs can be negative (e.g., `-1`, `-4`) and are treated as valid identities. Only an unparseable ID falls back to `-1` as a sentinel; exporters now avoid conflating a valid `-1` with parse-failure internally.
-
-## 🔄 Subset pairing in evaluation
-
-Per-subset evaluation pairs query and gallery by subset index:
-- Query subset `test_k` is evaluated against gallery subset `train_k`.
-- If a matching gallery subset is not found, the evaluator falls back to the full gallery.
-
-Tip: Use `benchmark/utils/inspect_h5.py` to list detected subsets in an H5 file.
-
-
-## ▶️ Example evaluation
-
-- Standard:
-  - `python evaluate_reid.py --gallery <gallery.h5> --query <query.h5> --topk 1 5 10`
-- Per-subset:
-  - `python evaluate_reid.py --gallery <gallery.h5> --query <query.h5> --topk 1 5 10 --per-subset`
-
-If results look off, run the sanity checks above and confirm subset pairing (`test_k` vs `train_k`), ID overlap, and absence of path duplication across query/gallery.
+Check [`reid/`](reid) and [`tracking/`](tracking) directories for the specific protocols to evaluate each task-oriented benchmark.
