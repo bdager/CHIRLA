@@ -4,3 +4,6 @@ scikit-learn
 tqdm
 matplotlib
 pandas
+# Benchmark requirements
+ultralytics
+boxmot
