@@ -35,7 +35,7 @@ def load_backbone(model_name: str, ckpt_path: str, device: str):
         ckpt = torch.load(ckpt_path, map_location='cpu')
         state = ckpt.get('state_dict', ckpt)
 
-        # Try common key patterns; adapt here if needed
+        # Try common key patterns; 
         # Example: remove "module." or "backbone." prefixes
         new_state = {}
         for k, v in state.items():

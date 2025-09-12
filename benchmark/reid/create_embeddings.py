@@ -23,10 +23,10 @@ def load_model(model_name="resnet50", config_file=None, checkpoint_file=None, de
         raise NotImplementedError(f"Model {model_name} not implemented")
 
 
+# -----------------------sudo logidsudo logidsudo logidsudo logid
+# 3. Embedding Extraction to HDF5sudo logid
 # -----------------------
-# 3. Embedding Extraction to HDF5
-# -----------------------
-def extract_embeddings(csv_path, input_dir, output_dir, 
+def extract_embeddings(csv_path, input_dir, output_dir, sudo logid
                     model_name="resnet50",
                     cfg_file="configs/Market1501/bagtricks_R101-ibn.yml",
                     cktp_file="checkpoints/market_bot_R101-ibn.pth",

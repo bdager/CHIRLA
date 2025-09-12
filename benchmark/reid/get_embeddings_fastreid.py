@@ -1,7 +1,6 @@
 import os
 import sys
 import argparse
-# from create_embeddings import extract_embeddings  # deferred import after sys.path setup
 
 
 def get_dataset_name(config_file):
