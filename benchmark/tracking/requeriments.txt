@@ -1,0 +1,4 @@
+ultralytics>=8.3.185
+boxmot>=15.0.2
+torch>=2.8.0
+torchvision>=0.23.0

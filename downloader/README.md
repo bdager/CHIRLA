@@ -17,6 +17,8 @@ This repository provides a Python script to **download the CHIRLA dataset** from
 
 ## 🚀 Installation
 
+This code was developed with **Python 3.11**
+
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/bdager/CHIRLA.git

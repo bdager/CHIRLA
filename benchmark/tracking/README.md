@@ -67,6 +67,8 @@ Supported trackers: [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrac
 
 - [StrongSORT](https://github.com/dyhBUPT/StrongSORT) –    *Make DeepSORT Great Again*    [GitHub reference](https://github.com/dyhBUPT/StrongSORT) -->
 
+We run these methods with **Python 3.11** using the module versions specified in [requirements.txt](requirements.txt).
+
 ### Batch Process All Videos
 ```
 python benchmark/tracking/tracker_botmox_all_videos.py \
