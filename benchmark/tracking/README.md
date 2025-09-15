@@ -52,6 +52,21 @@ We provide scripts to run trackers via [boxmot](https://github.com/mikel-brostro
 
 Supported trackers: [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack?utm_source=chatgpt.com), [BoostTrack+](https://github.com/vukasin-stanojevic/BoostTrack), [BoostTrack++](https://github.com/vukasin-stanojevic/BoostTrack?utm_source=chatgpt.com), [BoT-SORT](https://github.com/NirAharon/BoT-SORT), [ByteTrack](https://github.com/FoundationVision/ByteTrack), [OC-SORT](https://github.com/noahcao/OC_SORT), [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT).
 
+<!-- ### Supported Trackers
+- [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack) –  *Boosting the similarity measure and detection confidence for improved multiple object tracking*   [Paper (Springer, 2024)](https://link.springer.com/article/10.1007/s00138-024-01531-5)
+
+- [BoostTrack+ / BoostTrack++](https://github.com/vukasin-stanojevic/BoostTrack) –  *Using tracklet information to detect more objects with multiple object tracking*    [ArXiv (2024)](https://arxiv.org/abs/2408.13003)
+
+- [BoT-SORT](https://github.com/NirAharon/BoT-SORT) –    *Robust Associations Multi-Pedestrian Tracking*    [ArXiv (2022)](https://arxiv.org/abs/2206.14651)
+
+- [ByteTrack](https://github.com/FoundationVision/ByteTrack) –    *Multi-Object Tracking by Associating Every Detection Box*    [ECCV 2022](https://arxiv.org/abs/2110.06864)
+
+- [OC-SORT](https://github.com/noahcao/OC_SORT) –    *Observation-Centric SORT for Robust Multi-Object Tracking*    [ArXiv (2022)](https://arxiv.org/abs/2203.14360)
+
+- [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT) –    *Multi-Pedestrian Tracking by Adaptive Re-Identification*    [ArXiv (2023)](https://arxiv.org/abs/2302.11813)
+
+- [StrongSORT](https://github.com/dyhBUPT/StrongSORT) –    *Make DeepSORT Great Again*    [GitHub reference](https://github.com/dyhBUPT/StrongSORT) -->
+
 ### Batch Process All Videos
 ```
 python benchmark/tracking/tracker_botmox_all_videos.py \
@@ -62,7 +77,7 @@ python benchmark/tracking/tracker_botmox_all_videos.py \
 	--model benchmark/tracking/models/yolo11n.pt \
 	--tracker bytetrack --conf 0.25 --device 0
 ```
-Supported trackers: boosttrack, boosttrack+, boosttrack++, strongsort, ocsort, deepocsort, bytetrack, botsort.
+Tracker name format (CLI): boosttrack, boosttrack+, boosttrack++, strongsort, ocsort, deepocsort, bytetrack, botsort.
 
 ### Appearance-based Trackers
 For trackers with ReID support ([BoostTrack+](https://github.com/vukasin-stanojevic/BoostTrack), [BoostTrack++](https://github.com/vukasin-stanojevic/BoostTrack?utm_source=chatgpt.com), [BoT-SORT](https://github.com/NirAharon/BoT-SORT),  [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT)), enable `--with-reid` and specify weights:
@@ -105,7 +120,7 @@ python benchmark/tracking/generate_subset_trackers.py \
 	--tracker_root benchmark/tracking/data/trackers \
 ```
 
-### 5) Evaluate with TrackEval
+## 5) Evaluate with TrackEval
 Run [TrackEval](https://github.com/bdager/TrackEval):
 ```
 python benchmark/tracking/TrackEval/scripts/run_chirla_challenge.py \
