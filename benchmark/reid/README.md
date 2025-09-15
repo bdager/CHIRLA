@@ -1,4 +1,4 @@
-## 📈 Re-ID Benchmark Guide
+# 📈  Re-ID Benchmark Guide
 
 Workflow summary:
 
@@ -13,7 +13,7 @@ Workflow summary:
 
 
 
-### 📊 Evaluation Metrics
+## 📊 Evaluation Metrics
 
 Evaluation is performed per subset pair, where each query split `test_k` is matched against the corresponding gallery split `train_k`.  
 Final results are reported as the average across all such pairs.
@@ -26,7 +26,7 @@ The benchmark uses standard person Re-ID metrics:
 | **mAP**   | Mean Average Precision across all queries, measuring overall retrieval quality |
 
 
-### 🧩 HDF5 Format
+## 🧩 HDF5 Format
 
 Embeddings must be stored as HDF5 files with the following structure:
 
@@ -43,7 +43,7 @@ Embeddings must be stored as HDF5 files with the following structure:
 - Negative IDs (e.g., `-1`, `-4`) in queries represent **unknown identities**.
 
 
-### Data Split Roles
+## Data Split Roles
 
 Each ReID scenario provides multiple CSV files corresponding to different roles:
 
@@ -60,7 +60,7 @@ Each ReID scenario provides multiple CSV files corresponding to different roles:
 - ⚠️ Do **not** tune on `_query`, as it is reserved for final evaluation only.
 
 
-### Create Embeddings
+## Create Embeddings
 
 We provide scripts to generate embeddings from the gallery and query CSV files using existing ReID frameworks such as [CION_ReIDZoo](https://github.com/Zplusdragon/CION_ReIDZoo), [FastReID](https://github.com/JDAI-CV/fast-reid), and [Centroids-ReID](https://github.com/bdager/centroids-reid).  
 
@@ -82,7 +82,7 @@ python create_embeddings.py \
 ```
 
 
-### Run Evaluation
+## Run Evaluation
 
 We provide flexible evaluation scripts supporting different evaluation modes.
 
@@ -124,7 +124,7 @@ By default, batch evaluation averages metrics across subsets.
 
 
 
-### 📌 Open / Closed Set Evaluation 
+## 📌 Open / Closed Set Evaluation 
 
 We report **closed-set evaluation** for baseline results, excluding distractors (unknown IDs) from the test/query set.  
 
@@ -142,6 +142,6 @@ For detailed results and experimental settings, please refer to our [paper](http
 ![reid results](assets/reid_res.png)
 
 
-### 🙏 Acknowledgements
+## 🙏 Acknowledgements
 
 We thank the great works and open-source repositories: [CION_ReIDZoo](https://github.com/Zplusdragon/CION_ReIDZoo), [FastReID](https://github.com/JDAI-CV/fast-reid) and [Centroids-ReID](https://github.com/mikwieczorek/centroids-reid).

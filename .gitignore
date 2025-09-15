@@ -12,4 +12,12 @@ benchmark/tracking/data/
 
 benchmark/extract_metadata.py
 
+benchmark/tracking/botmox_tracker.py
+benchmark/tracking/botmox_yolo_tracker.py
+benchmark/tracking/yolo_tracker.py
+benchmark/tracking/tracker_all_videos.py
+
+benchmark/reid/models_&_embeddings.zip
+benchmark/tracking/data_&_models.zip
+
 *__pycache__/
