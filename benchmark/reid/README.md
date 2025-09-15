@@ -60,9 +60,14 @@ Each ReID scenario provides multiple CSV files corresponding to different roles:
 - ⚠️ Do **not** tune on `_query`, as it is reserved for final evaluation only.
 
 
-### ▶️ Create Embeddings
+### Create Embeddings
 
-We provide some code to generate embeddings from gallery/query CSVs using pre-trained models (CION_ReIDZoo](https://github.com/Zplusdragon/CION_ReIDZoo), [FastReID](https://github.com/JDAI-CV/fast-reid), [Centroids-ReID](https://github.com/mikwieczorek/centroids-reid).) Take into account you should download the pre-trained model weights from the repositories.
+We provide scripts to generate embeddings from the gallery and query CSV files using existing ReID frameworks such as [CION_ReIDZoo](https://github.com/Zplusdragon/CION_ReIDZoo), [FastReID](https://github.com/JDAI-CV/fast-reid), and [Centroids-ReID](https://github.com/bdager/centroids-reid).  
+
+To run the embedding extraction, make sure to:
+- Clone the corresponding repositories.  
+- Download the required pre-trained model weights and configuration files from each repository.  
+
 
 Use `create_embeddings.py` for one CSV or `get_embeddings_*.py` scripts for batches.
 
@@ -77,7 +82,7 @@ python create_embeddings.py \
 ```
 
 
-### ▶️ Run Evaluation
+### Run Evaluation
 
 We provide flexible evaluation scripts supporting different evaluation modes.
 
