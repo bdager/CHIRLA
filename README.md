@@ -1,6 +1,13 @@
 # CHIRLA: Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis
 
-[[`CHIRLA dataset`](https://doi.org/10.57760/sciencedb.20543)] [[`Paper`](https://arxiv.org/pdf/2502.06681)] [[`BibTeX`](#citation)]
+<!-- [[`CHIRLA dataset`](https://doi.org/10.57760/sciencedb.20543)] [[`Paper`](https://arxiv.org/pdf/2502.06681)] [[`BibTeX`](#citation)] -->
+
+
+<a href='https://huggingface.co/papers/2502.06681'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Paper-yellow'></a>
+<a href='https://huggingface.co/datasets/bdager/CHIRLA'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Dataset-yellow'></a>
+<a href='https://doi.org/10.57760/sciencedb.20543'><img src='https://img.shields.io/badge/ScienceDB-Dataset-blue'></a>
+[![arXiv](https://img.shields.io/badge/ArXiv-2502.06681-b31b1b.svg)](https://arxiv.org/abs/2502.06681)
+
 
 ![CHIRLA dataset](assets/dataset_sample.jpg?raw=true)
 
@@ -80,12 +87,17 @@ CHIRLA/
         └── multiple_people_occlusions/  # Multi-person scenarios
 ```
 
-## CHIRLA Dataset Downloader
+## 📥 CHIRLA Dataset Downloader
 
-For instructions to download the CHIRLA dataset, see [downloader/README.md](downloader/README.md).
+The CHIRLA dataset is hosted on **🤗 Hugging Face Datasets**:  
+👉 [bdager/CHIRLA](https://huggingface.co/datasets/bdager/CHIRLA)  
+
+We also provide a **CLI downloader** for direct access.  
+
+For detailed usage instructions (both Hugging Face and CLI options), see [downloader/README.md](downloader/README.md)
 
 
-## Benchmark
+## 📈 Benchmark
 We propose a benchmark with different scenarios for tracking and reidentification tasks. Please see [benchmark/README.md](benchmark/README.md) to have all the information on how to run your methods on the different challenges of the benchmark.
 
 ## Use Cases and Reusability
