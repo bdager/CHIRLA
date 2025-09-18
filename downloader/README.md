@@ -9,8 +9,7 @@ We provide flexible ways to load manifests, download the full dataset, or select
 The dataset is hosted on Hugging Face:  
 👉 [bdager/CHIRLA](https://huggingface.co/datasets/bdager/CHIRLA)
 
-### Quick Start (Lightweight)
-> Loads only **manifests/splits** (fast, small). Does **not** download `.mp4` videos.
+### Quick Start
 
 ```python
 from datasets import load_dataset
@@ -29,15 +28,8 @@ print(row.keys())
 #  'split', 'subset', 'seq', 'camera', 'person_id', 'frame_name', 'resolution']
 ```
 
-If you want to open an individual `image_path` or `annotation_path` without cloning, use `hf_hub_download`:
-
-```python
-from huggingface_hub import hf_hub_download
-fp = hf_hub_download("bdager/CHIRLA", repo_type="dataset", filename=row["image_path"])
-```
-
 ### Download Individual Files
-Use [`hf_hub_download`](https://huggingface.co/docs/huggingface_hub/v0.23.0/en/package_reference/hf_hub_download) to fetch a file directly without cloning:
+Use [`hf_hub_download`](https://huggingface.co/docs/huggingface_hub/v0.23.0/en/package_reference/hf_hub_download) to fetch a file (`image_path`,`annotation_path`, `video_path`) directly without cloning:
 
 ```python
 from huggingface_hub import hf_hub_download
@@ -61,16 +53,17 @@ print("Dataset downloaded to:", local_path)
 
 ### Fetch All Videos via `load_dataset`
 
-If you want to **cache all videos** through 🤗 Datasets, use the `videos` config.  
+If you want to cache all videos through 🤗 Datasets, use the `videos` config.  
 This uses `data/videos_<split>_all.parquet` with a `video_path` column.
 
 ```python
 from datasets import load_dataset
 
-vids = load_dataset("bdager/CHIRLA", "videos", split="train_all")
+vids = load_dataset("bdager/CHIRLA", "videos")
 print(vids)
 
-row = vids[0]
+# Example: inspect a video row
+row = vids["train_all"][0]
 print(row)
 ```
 
