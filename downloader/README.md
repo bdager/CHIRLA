@@ -1,8 +1,90 @@
-# CHIRLA Dataset Downloader
+# 📥 CHIRLA Dataset Downloader
 
-This repository provides a Python script to **download the CHIRLA dataset** from cloud storage. It supports filtering by file types, sequences, dataset splits, and subcategories such as ReID and Tracking scenarios.
+The **CHIRLA dataset** is available on both **🤗 Hugging Face Datasets** and **ScienceDB**.  
+We provide flexible ways to load manifests, download the full dataset, or selectively fetch data via a CLI tool.
 
-## 🎯 Features
+
+## 🚀 Load Dataset with 🤗 Datasets
+
+The dataset is hosted on Hugging Face:  
+👉 [bdager/CHIRLA](https://huggingface.co/datasets/bdager/CHIRLA)
+
+### Quick Start (Lightweight)
+> Loads only **manifests/splits** (fast, small). Does **not** download `.mp4` videos.
+
+```python
+from datasets import load_dataset
+
+# Load the full dataset
+chirla = load_dataset("bdager/CHIRLA")
+
+# Load specific scenarios
+reid_mc = load_dataset("bdager/CHIRLA", "reid_multi_cam")
+trk_bo  = load_dataset("bdager/CHIRLA", "tracking_brief")
+trk_mpo = load_dataset("bdager/CHIRLA", "tracking_multi")
+
+row = reid_mc["train"][0]
+print(row.keys())
+# ['image', 'image_path', 'annotation_path', 'task', 'scenario',
+#  'split', 'subset', 'seq', 'camera', 'person_id', 'frame_name', 'resolution']
+```
+
+If you want to open an individual `image_path` or `annotation_path` without cloning, use `hf_hub_download`:
+
+```python
+from huggingface_hub import hf_hub_download
+fp = hf_hub_download("bdager/CHIRLA", repo_type="dataset", filename=row["image_path"])
+```
+
+### Download Individual Files
+Use [`hf_hub_download`](https://huggingface.co/docs/huggingface_hub/v0.23.0/en/package_reference/hf_hub_download) to fetch a file directly without cloning:
+
+```python
+from huggingface_hub import hf_hub_download
+fp = hf_hub_download("bdager/CHIRLA", repo_type="dataset", filename=row["image_path"])
+```
+
+### Download the Full Dataset (including videos)
+
+**Option A – Clone with Git LFS (recommended for local work):**
+```bash
+git lfs install
+git clone https://huggingface.co/datasets/bdager/CHIRLA
+```
+
+**Option B – Programmatic download:**
+```python
+from huggingface_hub import snapshot_download
+local_path = snapshot_download("bdager/CHIRLA", repo_type="dataset")
+print("Dataset downloaded to:", local_path)
+```
+
+### Fetch All Videos via `load_dataset`
+
+If you want to **cache all videos** through 🤗 Datasets, use the `videos` config.  
+This uses `data/videos_<split>_all.parquet` with a `video_path` column.
+
+```python
+from datasets import load_dataset
+
+vids = load_dataset("bdager/CHIRLA", "videos", split="train_all")
+print(vids)
+
+row = vids[0]
+print(row)
+```
+
+📖 More details: [🤗 Datasets Loading Guide](https://huggingface.co/docs/datasets/loading)
+
+
+## 🖥️ CHIRLA Dataset Downloader (CLI)
+
+CHIRLA is also archived on **ScienceDB**:  
+👉 [doi.org/10.57760/sciencedb.20543](https://doi.org/10.57760/sciencedb.20543)
+
+We provide a Python script to download CHIRLA from cloud storage with flexible filtering by split, modality, and scenario.
+
+### 🎯 Features
 
 - **Download from a list of URLs** with preserved directory structure  
 - **Flexible filtering system**:
@@ -15,7 +97,7 @@ This repository provides a Python script to **download the CHIRLA dataset** from
 - **Automatic directory creation** preserving the original dataset structure
 
 
-## 🚀 Installation
+### 🚀 Installation
 
 This code was developed with **Python 3.11**
 
@@ -30,7 +112,7 @@ This code was developed with **Python 3.11**
    pip install -r requirements.txt
    ```
 
-## 📖 Usage
+### 📖 Usage
 
 ### Basic Command
 
@@ -110,7 +192,7 @@ python chirla_downloader.py --input-file CHIRLA_urls.txt --output-dir ./CHIRLA_d
 
 > **Note**: All filters use **OR logic** - a file is downloaded if it matches **any** active filter. Sequence filters are applied as an additional constraint.
 
-## 📁 Output Structure
+### 📁 Output Structure
 
 The downloaded files will preserve the original CHIRLA dataset structure:
 
