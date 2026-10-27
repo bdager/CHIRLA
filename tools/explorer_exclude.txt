@@ -1,0 +1,10 @@
+# Curation list for tools/build_explorer.py. One entry per line; '#' starts a comment.
+# Open the page with #curate at the end of the URL to see the key of every crop and session.
+#
+# id_06/seq_024_c3     drop this crop; the next-best camera of that session replaces it
+# sync/seq_024         drop a session from the seven-camera view
+# sync/seq_024@1530    use frame 1530 for that session's seven-camera view
+# id_17                drop an identity entirely
+id_24
+id_25
+id_26

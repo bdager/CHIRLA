@@ -1,0 +1,76 @@
+name: Submit a leaderboard result
+description: Add your method's results on CHIRLA to the leaderboard.
+title: "[Leaderboard] "
+labels: ["leaderboard"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for evaluating on CHIRLA! Please follow the protocol on the
+        [leaderboard page](https://bdager.github.io/CHIRLA/leaderboard.html#protocol)
+        and fill in the fields below. We review submissions and add them to the leaderboard.
+  - type: input
+    id: method
+    attributes:
+      label: Method name
+      description: As it should appear in the table, e.g. "MyMethod (ResNet50)".
+    validations:
+      required: true
+  - type: dropdown
+    id: track
+    attributes:
+      label: Track
+      options:
+        - Re-identification, closed-set
+        - Re-identification, open-set
+        - Tracking
+    validations:
+      required: true
+  - type: input
+    id: paper
+    attributes:
+      label: Paper or preprint link
+      description: Leave empty only if you provide public code below.
+  - type: input
+    id: code
+    attributes:
+      label: Code link
+  - type: textarea
+    id: bibtex
+    attributes:
+      label: BibTeX
+      description: How people should cite your method.
+      render: bibtex
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: |
+        Re-ID: backbone, input size, pretraining data, and whether you trained or fine-tuned on CHIRLA.
+        Tracking: detector, appearance model (if any), and how parameters were tuned.
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Paste the numbers in this format (percentages for Re-ID, averaged over subsets, excluding train_0/test_0).
+      render: json
+      value: |
+        {
+          "long_term":              { "r1": , "r5": , "r10": , "map":  },
+          "multi_camera_long_term": { "r1": , "r5": , "r10": , "map":  },
+          "multi_camera":           { "r1": , "r5": , "r10": , "map":  },
+          "reappearance":           { "r1": , "r5": , "r10": , "map":  }
+        }
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I followed the CHIRLA benchmark protocol for this track.
+          required: true
+        - label: These results may be shown publicly on the CHIRLA leaderboard.
+          required: true

@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CHIRLA: Long-term Person Re-identification Dataset</title>
+<meta name="description" content="CHIRLA: a video-based dataset for long-term person re-identification and tracking. 7 months, 7 cameras, 22 identities, 963,554 bounding boxes.">
+<meta property="og:title" content="CHIRLA: Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis">
+<meta property="og:description" content="Long-term, video-based person Re-ID dataset: 7 months, 7 cameras, 22 identities, about 1M bounding boxes.">
+<meta property="og:image" content="https://raw.githubusercontent.com/bdager/CHIRLA/main/assets/dataset_sample.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='6' width='24' height='22' fill='none' stroke='%2300A3B4' stroke-width='3'/><rect x='4' y='1' width='13' height='7' fill='%2300A3B4'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans:wght@400;600&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --bg: #FFFFFF;
+  --text: #363636;
+  --muted: #6B6B6B;
+  --link: #3273DC;
+  --btn: #363636;
+  --btn-text: #FFFFFF;
+  --soft: #F5F5F5;
+  --line: #E4E4E4;
+  --accent: #00A3B4;
+  --accent-ink: #FFFFFF;
+  --room: #FAFAFA;
+  --room-on: #D6F1F4;
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16191D; --text: #E2E4E7; --muted: #A3A9B1; --link: #7EB0FF;
+    --btn: #E2E4E7; --btn-text: #16191D; --soft: #20252B; --line: #31373F;
+    --accent: #3CC8D6; --accent-ink: #10181A; --room: #1C2026; --room-on: #1D4A50;
+    --nav-bg: rgba(22, 25, 29, 0.9);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16191D; --text: #E2E4E7; --muted: #A3A9B1; --link: #7EB0FF;
+  --btn: #E2E4E7; --btn-text: #16191D; --soft: #20252B; --line: #31373F;
+  --accent: #3CC8D6; --accent-ink: #10181A; --room: #1C2026; --room-on: #1D4A50;
+  --nav-bg: rgba(22, 25, 29, 0.9);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 1rem/1.6 "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 20; background: var(--nav-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+img { max-width: 100%; height: auto; display: block; }
+
+.container { max-width: 1000px; margin: 0 auto; padding: 0 1.25rem; }
+.narrow { max-width: 760px; margin-left: auto; margin-right: auto; }
+section { padding: 3.25rem 0 0; }
+h2 { font-family: "Google Sans", "Noto Sans", sans-serif; font-weight: 500; font-size: 2rem; text-align: center; margin: 0 0 0.6rem; }
+.lead { text-align: center; color: var(--muted); max-width: 640px; margin: 0 auto 1.75rem; }
+h3 { font-family: "Google Sans", "Noto Sans", sans-serif; font-weight: 500; font-size: 1.35rem; margin: 2rem 0 0.75rem; }
+p { margin: 0 0 1rem; }
+.justify { text-align: justify; hyphens: auto; }
+
+/* ---------- Sticky nav ---------- */
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  background: var(--nav-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.nav .container { display: flex; align-items: center; gap: 1.25rem; height: 56px; }
+.nav .brand { font-family: "Fredoka", "Google Sans", sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 0.4rem; }
+.nav .brand i { color: var(--accent); font-size: 1rem; }
+.nav ul { display: flex; gap: 0.25rem; list-style: none; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; flex: 1; }
+.nav ul::-webkit-scrollbar { display: none; }
+.nav li a { display: block; padding: 0.35rem 0.7rem; border-radius: 999px; color: var(--muted); white-space: nowrap; font-size: 0.93rem; text-decoration: none; }
+.nav li a:hover { color: var(--text); background: var(--soft); }
+.nav li a.current { color: var(--text); background: var(--soft); }
+.nav .paper { white-space: nowrap; background: var(--btn); color: var(--btn-text); border-radius: 999px; padding: 0.35rem 0.9rem; font-size: 0.9rem; text-decoration: none; }
+@media (max-width: 640px) { .nav .paper { display: none; } }
+
+/* ---------- Hero ---------- */
+.hero { text-align: center; padding: 3rem 0 0.5rem; }
+.logo { font-family: "Fredoka", "Google Sans", sans-serif; font-weight: 700; font-size: clamp(4rem, 15vw, 8.5rem); line-height: 1; letter-spacing: 0.01em; margin: 0.4em 0 0.25em; }
+.bbox { position: relative; display: inline-block; padding: 0.04em 0.14em 0.08em; }
+.bbox::before { content: ""; position: absolute; inset: 0; border: 0.045em solid var(--accent); border-radius: 0.04em; animation: lock 900ms cubic-bezier(.2,.7,.2,1) 200ms both; }
+.bbox::after { content: "ID 1"; position: absolute; left: -0.02em; bottom: calc(100% - 0.02em); background: var(--accent); color: var(--accent-ink); font: 700 0.17em/1 "Google Sans", "Noto Sans", sans-serif; padding: 0.3em 0.55em 0.25em; border-radius: 0.2em 0.2em 0 0; animation: fade 350ms ease-out 950ms both; }
+@keyframes lock { from { inset: -0.3em -0.45em; opacity: 0; } to { inset: 0; opacity: 1; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .bbox::before, .bbox::after { animation: none; } }
+.title { font-family: "Google Sans", "Noto Sans", sans-serif; font-weight: 400; font-size: clamp(1.6rem, 3.6vw, 2.5rem); line-height: 1.2; max-width: 820px; margin: 0 auto 1.25rem; }
+.authors { font-family: "Google Sans", "Noto Sans", sans-serif; font-size: 1.15rem; margin: 0 0 0.2rem; }
+.authors span { display: inline-block; margin: 0 0.35rem; }
+.affil { font-family: "Google Sans", "Noto Sans", sans-serif; font-size: 1.05rem; margin: 0; }
+.venue { font-family: "Google Sans", "Noto Sans", sans-serif; font-size: 1.05rem; margin: 0.6rem 0 0; color: var(--muted); }
+.venue strong { color: var(--text); font-weight: 500; }
+.buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 1.4rem 0 0; padding: 0; list-style: none; }
+.buttons a { display: inline-flex; align-items: center; gap: 0.45rem; background: var(--btn); color: var(--btn-text); border-radius: 999px; padding: 0.45rem 1.05rem; font-size: 0.95rem; text-decoration: none; transition: opacity 150ms; }
+.buttons a:hover { opacity: 0.82; text-decoration: none; }
+.teaser { margin: 2.25rem 0 0; }
+.teaser img { border-radius: 6px; width: 100%; }
+
+/* ---------- Stats band ---------- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 1.5rem 0 0; padding: 0; }
+@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); row-gap: 1rem; } }
+.stats div { text-align: center; display: flex; flex-direction: column-reverse; }
+.stats dd { margin: 0; font-family: "Fredoka", "Google Sans", sans-serif; font-weight: 600; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.stats dt { color: var(--muted); font-size: 0.95rem; }
+.substats { text-align: center; color: var(--muted); font-size: 0.92rem; margin: 1rem 0 0; }
+
+/* ---------- Features ---------- */
+.features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+@media (max-width: 640px) { .features { grid-template-columns: 1fr; } }
+.feature { background: var(--soft); border-radius: 8px; padding: 1rem 1.15rem; }
+.feature h4 { margin: 0 0 0.3rem; font-family: "Google Sans", "Noto Sans", sans-serif; font-weight: 500; font-size: 1.1rem; }
+.feature h4 i { color: var(--accent); margin-right: 0.45rem; width: 1.1em; }
+.feature p { margin: 0; font-size: 0.95rem; }
+
+/* ---------- Explorer ---------- */
+.lead-link { text-align: center; margin: -0.75rem 0 1.5rem; }
+.lead-link a { display: inline-flex; align-items: center; gap: 0.4rem; border: 1.5px solid var(--line); border-radius: 999px; padding: 0.35rem 0.95rem; color: var(--text); font-size: 0.92rem; text-decoration: none; }
+.lead-link a:hover { border-color: var(--accent); text-decoration: none; }
+.tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 1.25rem; }
+.tab { font: 500 0.95rem "Google Sans", "Noto Sans", sans-serif; background: var(--soft); color: var(--text); border: 0; border-radius: 999px; padding: 0.5rem 1.1rem; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--btn); color: var(--btn-text); }
+.panel[hidden] { display: none; }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.35rem; margin: 0 0 1rem; }
+.chip { font: 600 0.88rem "Google Sans", "Noto Sans", sans-serif; min-width: 3.4rem; background: var(--bg); color: var(--text); border: 1.5px solid var(--line); border-radius: 6px; padding: 0.35rem 0.5rem; cursor: pointer; font-variant-numeric: tabular-nums; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.summary { text-align: center; color: var(--muted); font-size: 0.95rem; margin: 0 auto 1rem; max-width: 760px; min-height: 1.6em; }
+.summary .inline-btn { font: 500 0.88rem "Google Sans", "Noto Sans", sans-serif; background: var(--soft); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 0.2rem 0.75rem; margin: 0.35rem 0.2rem 0; cursor: pointer; }
+.summary .inline-btn:hover { border-color: var(--accent); }
+.key { display: block; font: 0.72rem/1.3 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); margin-top: 0.15rem; user-select: all; }
+
+/* Timeline (one person over time) */
+.timeline { display: flex; overflow-x: auto; padding: 0.25rem 0.25rem 1rem; justify-content: safe center; scroll-snap-type: x proximity; }
+.seg { flex: 0 0 auto; display: flex; flex-direction: column; padding: 0 0.55rem; scroll-snap-align: start; }
+.mhead { position: relative; font: 600 0.92rem "Google Sans", "Noto Sans", sans-serif; white-space: nowrap; padding: 0 0 1.15rem 1.1rem; }
+.mhead::after { content: ""; position: absolute; left: -0.55rem; right: -0.55rem; bottom: 0.45rem; height: 2px; background: var(--text); }
+.mhead::before { content: ""; position: absolute; left: 0; bottom: 0.17rem; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); z-index: 1; }
+.seg.gap { justify-content: flex-start; min-width: 7.5rem; }
+.seg.gap .mhead { color: var(--muted); font-weight: 400; font-style: italic; padding-left: 0.4rem; text-align: center; }
+.seg.gap .mhead::before { display: none; }
+.seg.gap .mhead::after { background: repeating-linear-gradient(90deg, var(--muted) 0 5px, transparent 5px 10px); }
+.cards { display: flex; gap: 0.6rem; }
+.card { margin: 0; }
+.card button { display: block; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: zoom-in; font: inherit; }
+.card .frame { position: relative; height: 220px; min-width: 100px; border: 3px solid var(--accent); border-radius: 4px; background: var(--soft); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; transition: transform 150ms; }
+.card button:hover .frame { transform: translateY(-2px); }
+.card .frame img { height: 100%; width: auto; max-width: none; }
+.card .frame svg { height: 88%; width: auto; }
+.card figcaption { font-size: 0.82rem; margin-top: 0.4rem; line-height: 1.35; }
+.card figcaption b { display: block; font-weight: 600; font-size: 0.88rem; }
+.card figcaption span { color: var(--muted); }
+.ph-fig { fill: var(--line); }
+.card .zoom { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 0.85rem; opacity: 0; transition: opacity 150ms; }
+.card button:hover .zoom, .card button:focus-visible .zoom { opacity: 1; }
+@media (hover: none) { .card .zoom { opacity: 0.9; } }
+.idpicker { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin: 0 auto 1rem; max-width: 760px; }
+.idpicker-label { font: 600 0.95rem "Google Sans", "Noto Sans", sans-serif; color: var(--muted); align-self: flex-start; line-height: 34px; }
+.idchips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chip.morechip { display: inline-flex; align-items: center; height: 34px; padding: 0 0.8rem; border-radius: 999px; border-style: dashed; color: var(--muted); font-weight: 500; text-decoration: none; }
+.chip.morechip:hover { color: var(--text); border-color: var(--accent); text-decoration: none; }
+.chip.idchip { min-width: 0; width: 34px; height: 34px; padding: 0; border-radius: 50%; display: grid; place-items: center; font-size: 0.85rem; }
+.hint { display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: var(--accent); font-weight: 600; font-size: 0.95rem; margin: -0.4rem 0 1rem; }
+@media (prefers-reduced-motion: reduce) { .card .zoom { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .card .frame { transition: none; } .card button:hover .frame { transform: none; } }
+
+/* Frames with people boxes (sync view and enlarged view) */
+.stage { position: relative; width: 100%; border-radius: 4px; overflow: hidden; background: var(--soft); }
+.stage > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.stage .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 0.85rem; }
+.pbox { position: absolute; border: 2px solid var(--c); background: transparent; padding: 0; margin: 0; border-radius: 2px; transition: opacity 150ms; }
+button.pbox { cursor: pointer; }
+button.pbox:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8); }
+.pbox span { position: absolute; left: -2px; bottom: 100%; background: var(--c); color: #FFFFFF; font: 600 11px/1.4 "Google Sans", "Noto Sans", sans-serif; padding: 0 5px; white-space: nowrap; border-radius: 2px 2px 0 0; }
+.pbox.inside span { bottom: auto; top: 0; border-radius: 0 0 2px 0; }
+.pbox.hl { z-index: 2; border-width: 3px; box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 5px var(--c); }
+.pbox.dim { opacity: 0.3; }
+
+/* Seven cameras */
+.sessions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.35rem; margin: 0 0 1rem; }
+.grid7 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem 0.5rem; }
+@media (max-width: 640px) { .grid7 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.view { margin: 0; }
+.view figcaption { font-size: 0.82rem; margin-top: 0.3rem; color: var(--muted); }
+.view figcaption b { color: var(--text); font-weight: 600; margin-right: 0.3rem; }
+.view.has-hl .stage { outline: 3px solid var(--accent); outline-offset: 2px; }
+.view.map .mapbox { background: var(--soft); border-radius: 4px; padding: 0.4rem; aspect-ratio: 3 / 2; display: flex; align-items: center; }
+.view.map svg { width: 100%; height: auto; display: block; }
+.mini .room { pointer-events: none; }
+.mini .room rect { fill: var(--bg); stroke: var(--muted); stroke-width: 2; }
+.mini .room text { font-size: 30px; fill: var(--muted); }
+.mini .door { stroke: var(--bg); }
+.mini .cam circle { fill: var(--line); r: 24px; }
+.mini .cam text { fill: var(--muted); font-size: 18px; }
+.mini .cam.on circle { fill: var(--accent); }
+.mini .cam.on text { fill: var(--accent-ink); }
+.mini .cam.hl circle { stroke: var(--text); stroke-width: 5; }
+
+/* Enlarged view */
+dialog.lb { border: 0; padding: 0; background: var(--bg); color: var(--text); border-radius: 10px; width: min(960px, 94vw); max-height: 94vh; overflow: auto; }
+dialog.lb::backdrop { background: rgba(0, 0, 0, 0.72); }
+.lb-body { padding: 1rem; }
+#lb-stage { max-width: calc((94vh - 7.5rem) * 1.5); margin: 0 auto; }
+.lb-crop { display: block; margin: 0 auto; max-height: 70vh; width: auto; }
+.lb-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.8rem; }
+.lb-meta p { margin: 0; font-size: 0.95rem; }
+.lb-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.lb-actions button { font: 500 0.9rem "Google Sans", "Noto Sans", sans-serif; background: var(--soft); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 0.4rem 0.9rem; cursor: pointer; }
+.lb-actions button:hover:not(:disabled) { border-color: var(--accent); }
+.lb-actions button:disabled { opacity: 0.4; cursor: default; }
+.lb-actions .primary { background: var(--btn); color: var(--btn-text); border-color: var(--btn); }
+.demo-note { background: var(--soft); border-left: 3px solid var(--accent); border-radius: 4px; padding: 0.7rem 1rem; font-size: 0.9rem; max-width: 760px; margin: 0 auto 1.25rem; }
+.demo-note[hidden] { display: none; }
+
+/* ---------- Environment ---------- */
+.env { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1.75rem; align-items: center; }
+@media (max-width: 760px) { .env { grid-template-columns: 1fr; } }
+.plan svg { width: 100%; height: auto; display: block; }
+.room rect { fill: var(--room); stroke: var(--text); stroke-width: 1.5; transition: fill 150ms; }
+.room text { fill: var(--text); font: 500 15px "Google Sans", "Noto Sans", sans-serif; }
+.room .area { fill: var(--muted); font-weight: 400; font-size: 12px; }
+.room { cursor: pointer; outline: none; }
+.room:hover rect, .room:focus rect, .room.active rect { fill: var(--room-on); }
+.room:focus-visible rect { stroke: var(--accent); stroke-width: 3; }
+.door { stroke: var(--room); stroke-width: 6; }
+.cam circle { fill: var(--accent); }
+.cam text { fill: var(--accent-ink); font: 700 10px "Google Sans", "Noto Sans", sans-serif; text-anchor: middle; dominant-baseline: central; }
+.plan-note { color: var(--muted); font-size: 0.85rem; text-align: center; margin: 0.5rem 0 0; }
+.room-info { background: var(--soft); border-radius: 8px; padding: 1.1rem 1.25rem; }
+.room-info h3 { margin: 0 0 0.4rem; font-size: 1.2rem; }
+.room-info p { margin: 0; font-size: 0.95rem; }
+
+/* ---------- Tables ---------- */
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+th, td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+thead th { border-top: 2px solid var(--text); border-bottom: 1px solid var(--text); font-weight: 600; }
+tbody tr:last-child td { border-bottom: 2px solid var(--text); }
+td.num, th.num { text-align: center; white-space: nowrap; }
+td small { display: block; color: var(--muted); font-size: 0.8rem; }
+.caption { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 0.6rem; }
+
+/* ---------- Download ---------- */
+.dl { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1.5rem; align-items: start; }
+@media (max-width: 760px) { .dl { grid-template-columns: 1fr; } }
+.opts { background: var(--soft); border-radius: 8px; padding: 1rem 1.1rem; }
+.opts fieldset { border: 0; margin: 0 0 0.9rem; padding: 0; }
+.opts legend { font-weight: 600; margin-bottom: 0.4rem; padding: 0; }
+.opts label { display: flex; gap: 0.55rem; align-items: flex-start; padding: 0.3rem 0; cursor: pointer; font-size: 0.95rem; }
+.opts label small { display: block; color: var(--muted); font-size: 0.82rem; }
+.opts input { margin-top: 0.3rem; accent-color: var(--accent); }
+.opts .row { display: flex; gap: 1rem; }
+.code-box { position: relative; }
+pre { background: var(--soft); border-radius: 6px; padding: 1rem 1.15rem; overflow-x: auto; font: 0.85rem/1.55 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; margin: 0 0 1rem; }
+code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.9em; }
+.copy { position: absolute; right: 0.6rem; top: 0.6rem; background: var(--btn); color: var(--btn-text); border: 0; border-radius: 999px; padding: 0.3rem 0.8rem; font: 0.82rem "Noto Sans", sans-serif; cursor: pointer; }
+.copy:hover { opacity: 0.85; }
+.small { font-size: 0.9rem; color: var(--muted); }
+
+/* ---------- Team ---------- */
+.team { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; list-style: none; padding: 0; margin: 0; }
+@media (max-width: 640px) { .team { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.team a { display: flex; flex-direction: column; align-items: center; text-align: center; color: var(--text); text-decoration: none; padding: 1rem 0.5rem; border-radius: 8px; }
+.team a:hover { background: var(--soft); }
+.avatar { width: 84px; height: 84px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font: 600 1.6rem "Fredoka", "Google Sans", sans-serif; margin-bottom: 0.6rem; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.team b { font-weight: 600; }
+.team span { color: var(--muted); font-size: 0.88rem; }
+.logos { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2.5rem 3.5rem; margin: 1rem 0 0; }
+.logos img { height: 84px; width: auto; max-width: 260px; object-fit: contain; }
+@media (max-width: 640px) { .logos img { height: 64px; } }
+
+footer { margin-top: 3.5rem; padding: 2rem 0 2.5rem; background: var(--soft); font-size: 0.88rem; color: var(--muted); }
+footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Sections">
+  <div class="container">
+    <a class="brand" href="#top"><i class="fa-regular fa-square"></i>CHIRLA</a>
+    <ul>
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#explore">Explore</a></li>
+      <li><a href="#environment">Environment</a></li>
+      <li><a href="#benchmark">Benchmark</a></li>
+      <li><a href="leaderboard.html">Leaderboard</a></li>
+      <li><a href="#download">Download</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#citation">Citation</a></li>
+    </ul>
+    <a class="paper" href="https://www.nature.com/articles/s41597-025-06425-3">Paper</a>
+  </div>
+</nav>
+
+<!-- ================= Hero ================= -->
+<header class="hero container" id="top">
+  <div class="logo" aria-label="CHIRLA"><span class="bbox">CHIRLA</span></div>
+  <h1 class="title">Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis</h1>
+  <p class="authors">
+    <span><a href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Bessie+Dominguez-Dager" data-person="bessie">Bessie Dominguez-Dager</a></span>
+    <span><a href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Felix+Escalona" data-person="felix">Felix Escalona</a></span>
+    <span><a href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Francisco+Gomez-Donoso" data-person="francisco">Francisco Gomez-Donoso</a></span>
+    <span><a href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Miguel+Cazorla" data-person="miguel">Miguel Cazorla</a></span>
+  </p>
+  <p class="affil">Institute for Computing Research, University of Alicante</p>
+  <p class="venue"><strong>Scientific Data</strong>, 2026</p>
+  <ul class="buttons">
+    <li><a href="https://www.nature.com/articles/s41597-025-06425-3"><i class="fa-solid fa-file-pdf"></i>Paper</a></li>
+    <li><a href="https://arxiv.org/abs/2502.06681"><i class="fa-solid fa-scroll"></i>arXiv</a></li>
+    <li><a href="https://github.com/bdager/CHIRLA"><i class="fa-brands fa-github"></i>Code</a></li>
+    <li><a href="https://huggingface.co/datasets/bdager/CHIRLA"><span aria-hidden="true">🤗</span>Dataset</a></li>
+    <li><a href="https://www.scidb.cn/en/detail?dataSetId=2247f442a9784b5c959e7bead89c0313"><i class="fa-solid fa-database"></i>Science Data Bank</a></li>
+    <li><a href="https://github.com/bdager/preid-labeling-gui"><i class="fa-solid fa-pen-ruler"></i>Labeling Tool</a></li>
+  </ul>
+
+  <figure class="teaser">
+    <img src="https://raw.githubusercontent.com/bdager/CHIRLA/main/assets/dataset_sample.jpg" alt="Annotated frames from several CHIRLA camera views">
+  </figure>
+  <dl class="stats">
+    <div><dt>Months of recording</dt><dd>7</dd></div>
+    <div><dt>Identities</dt><dd>22</dd></div>
+    <div><dt>Cameras</dt><dd>7</dd></div>
+    <div><dt>Bounding boxes</dt><dd>963K</dd></div>
+  </dl>
+  <p class="substats">70 videos, 5.5 hours, 596,345 frames at 1080×720 and 30 fps</p>
+</header>
+
+<main class="container">
+
+  <!-- ================= Abstract ================= -->
+  <section id="abstract">
+    <h2>Abstract</h2>
+    <p class="narrow justify">Person re-identification (Re-ID) is a key challenge in computer vision, requiring the matching of individuals across cameras, locations, and time. While most research focuses on short-term scenarios with minimal appearance changes, real-world applications demand robust systems that handle long-term variations caused by clothing and physical changes. We present CHIRLA, Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis, a novel dataset designed for video-based long-term person Re-ID. CHIRLA was recorded over seven months in four connected indoor environments using seven strategically placed cameras, capturing realistic movements with substantial clothing and appearance variability. The dataset includes 22 individuals, more than five hours of video, and about 1M bounding boxes with identity annotations obtained through semi-automatic labeling. We also define benchmark protocols for person tracking and Re-ID, covering diverse and challenging scenarios such as occlusion, reappearance, and multi-camera conditions. By introducing this comprehensive benchmark, we aim to facilitate the development and evaluation of Re-ID algorithms that can reliably perform in challenging, long-term real-world scenarios.</p>
+    <div class="features">
+      <div class="feature"><h4><i class="fa-solid fa-film"></i>Long-term and video-based</h4><p>Continuous videos instead of isolated crops, with the same people recurring across ten sessions recorded between May and December.</p></div>
+      <div class="feature"><h4><i class="fa-solid fa-shirt"></i>Real appearance change</h4><p>Participants changed clothes between sessions, and put on or took off jackets, hats and accessories within them.</p></div>
+      <div class="feature"><h4><i class="fa-solid fa-layer-group"></i>Dense per-identity data</h4><p>Around 44K boxes per identity, more than previous clothing-change datasets, with higher-resolution crops where faces are often visible.</p></div>
+      <div class="feature"><h4><i class="fa-solid fa-user-secret"></i>Open-set evaluation</h4><p>Test sets include distractors that never appear in training, so models must decide when a person is unknown.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= Explorer ================= -->
+  <section id="explore">
+    <h2>Explore the Data</h2>
+    <p class="lead">A small selection of examples from CHIRLA. Follow one person across months and cameras, or see a single moment from all seven cameras at once.</p>
+    <p class="lead-link"><a href="https://huggingface.co/datasets/bdager/CHIRLA/viewer"><span aria-hidden="true">🤗</span>Browse the full dataset on Hugging Face</a></p>
+    <p class="demo-note" id="demo-note">Preview mode: these are placeholder tiles. Run <code>tools/build_explorer.py</code> on the dataset to generate the real crops and frames; this section fills in automatically.</p>
+
+    <div class="tabs" role="tablist" aria-label="Explorer views">
+      <button class="tab" role="tab" id="tab-ids" aria-controls="panel-ids" aria-selected="true">One person over time</button>
+      <button class="tab" role="tab" id="tab-sync" aria-controls="panel-sync" aria-selected="false" tabindex="-1">One moment, seven cameras</button>
+    </div>
+
+    <div class="panel" id="panel-ids" role="tabpanel" aria-labelledby="tab-ids">
+      <div class="idpicker">
+        <span class="idpicker-label" id="idpicker-label">ID</span>
+        <div class="idchips" id="id-chips" role="group" aria-labelledby="idpicker-label"></div>
+      </div>
+      <p class="summary" id="id-summary" aria-live="polite"></p>
+      <p class="hint"><i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>Click any crop to see the full camera frame</p>
+      <div class="timeline" id="id-timeline" tabindex="0" aria-label="Crops of the selected person on a month timeline"></div>
+    </div>
+
+    <div class="panel" id="panel-sync" role="tabpanel" aria-labelledby="tab-sync" hidden>
+      <div class="sessions" id="sync-sessions" role="group" aria-label="Choose a session"></div>
+      <div class="summary" id="sync-summary" aria-live="polite"></div>
+      <div class="grid7" id="sync-grid"></div>
+    </div>
+
+    <dialog class="lb" id="lb" aria-labelledby="lb-caption">
+      <div class="lb-body">
+        <div id="lb-stage"></div>
+        <div class="lb-meta">
+          <p id="lb-caption"></p>
+          <div class="lb-actions">
+            <button type="button" id="lb-prev" aria-label="Previous crop">Previous</button>
+            <button type="button" id="lb-next" aria-label="Next crop">Next</button>
+            <button type="button" id="lb-sync" class="primary">See all cameras in this session</button>
+            <button type="button" id="lb-close">Close</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+  </section>
+
+  <!-- ================= Environment ================= -->
+  <section id="environment">
+    <h2>Recording Environment</h2>
+    <p class="lead">Three laboratories, a corridor and a small office at the University of Alicante. Cameras face the doorways, and their views barely overlap. Click a room to see how it is covered.</p>
+    <div class="env">
+      <div class="plan">
+        <svg viewBox="0 0 800 370" role="group" aria-label="Schematic of the recorded spaces and their seven cameras">
+          <g class="room" data-room="O1" tabindex="0" role="button" aria-label="Office O1"><rect x="300" y="10" width="190" height="62" rx="4"/><text x="315" y="38">O1</text><text class="area" x="315" y="58">8.5 m²</text></g>
+          <g class="room" data-room="L1" tabindex="0" role="button" aria-label="Laboratory L1"><rect x="20" y="100" width="240" height="140" rx="4"/><text x="36" y="128">L1</text><text class="area" x="36" y="148">33.3 m²</text></g>
+          <g class="room" data-room="L2" tabindex="0" role="button" aria-label="Laboratory L2"><rect x="280" y="100" width="230" height="140" rx="4"/><text x="296" y="128">L2</text><text class="area" x="296" y="148">20.6 m²</text></g>
+          <g class="room" data-room="L3" tabindex="0" role="button" aria-label="Laboratory L3"><rect x="530" y="100" width="250" height="140" rx="4"/><text x="546" y="128">L3</text><text class="area" x="546" y="148">27.9 m²</text></g>
+          <g class="room" data-room="H1" tabindex="0" role="button" aria-label="Corridor H1"><rect x="20" y="268" width="760" height="82" rx="4"/><text x="36" y="296">H1</text><text class="area" x="36" y="316">44.0 m²</text></g>
+          <line class="door" x1="370" y1="72" x2="420" y2="72"/><line class="door" x1="370" y1="100" x2="420" y2="100"/>
+          <line class="door" x1="510" y1="160" x2="510" y2="200"/><line class="door" x1="530" y1="160" x2="530" y2="200"/>
+          <line class="door" x1="120" y1="240" x2="170" y2="240"/><line class="door" x1="370" y1="240" x2="420" y2="240"/><line class="door" x1="630" y1="240" x2="680" y2="240"/>
+          <line class="door" x1="120" y1="268" x2="170" y2="268"/><line class="door" x1="370" y1="268" x2="420" y2="268"/><line class="door" x1="630" y1="268" x2="680" y2="268"/>
+          <g class="cam" data-cam="1"><circle cx="465" cy="40" r="13"/><text x="465" y="40">C1</text></g>
+          <g class="cam" data-cam="2"><circle cx="485" cy="215" r="13"/><text x="485" y="215">C2</text></g>
+          <g class="cam" data-cam="3"><circle cx="305" cy="215" r="13"/><text x="305" y="215">C3</text></g>
+          <g class="cam" data-cam="4"><circle cx="555" cy="180" r="13"/><text x="555" y="180">C4</text></g>
+          <g class="cam" data-cam="5"><circle cx="560" cy="325" r="13"/><text x="560" y="325">C5</text></g>
+          <g class="cam" data-cam="6"><circle cx="250" cy="325" r="13"/><text x="250" y="325">C6</text></g>
+          <g class="cam" data-cam="7"><circle cx="235" cy="125" r="13"/><text x="235" y="125">C7</text></g>
+        </svg>
+        <p class="plan-note">Connectivity schematic, not to scale. Exact camera poses are in Fig. 1 of the paper.</p>
+      </div>
+      <div class="room-info" aria-live="polite">
+        <h3 id="room-title">Seven cameras, five spaces</h3>
+        <p id="room-text">Reolink RLC-410W cameras with an 80° horizontal field of view, streamed and synchronized through ROS Noetic.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Benchmark ================= -->
+  <section id="benchmark">
+    <h2>Benchmark</h2>
+    <p class="lead">Four Re-ID scenarios and two tracking scenarios, each with its own splits. Below is the best reported result per scenario; the leaderboard has every method, sortable, with citations.</p>
+    <p class="lead-link"><a href="leaderboard.html"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i>Full leaderboard and how to submit</a></p>
+    <h3>Person re-identification</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scenario</th><th>What it tests</th><th class="num">Rank-1 (%)</th><th class="num">mAP (%)</th></tr></thead>
+        <tbody>
+          <tr><td>Reappearance</td><td>Leaving a camera’s view and coming back</td><td class="num">65.73<small>ResNet101-IBN†</small></td><td class="num">63.85<small>ResNet152</small></td></tr>
+          <tr><td>Multi-camera</td><td>Different cameras within a session</td><td class="num">56.01<small>ResNet152</small></td><td class="num">55.90<small>ResNet152</small></td></tr>
+          <tr><td>Multi-camera long-term</td><td>Different cameras and different days</td><td class="num">24.31<small>ResNet101 (384×128)</small></td><td class="num">35.28<small>ResNet101-IBN†</small></td></tr>
+          <tr><td>Long-term</td><td>Same camera across different days</td><td class="num">18.81<small>ResNet101 (256×128)</small></td><td class="num">23.24<small>ResNet101</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Closed-set results averaged over subsets. Rows go from easiest to hardest.</p>
+    <h3>Person tracking</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>What it tests</th><th class="num">MOTA</th><th class="num">IDF1</th></tr></thead>
+        <tbody>
+          <tr><td>Full test set</td><td>General tracking over 56 test videos</td><td class="num">68.84<small>BoT-SORT†</small></td><td class="num">42.54<small>BoT-SORT†</small></td></tr>
+          <tr><td>Brief occlusions</td><td>Fully hidden for one to five seconds</td><td class="num">12.42<small>BoT-SORT</small></td><td class="num">19.15<small>BoT-SORT</small></td></tr>
+          <tr><td>Multiple people and occlusions</td><td>People crossing or hiding each other</td><td class="num">21.83<small>BoT-SORT</small></td><td class="num">33.88<small>BoT-SORT</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">† Variant using appearance features. To evaluate your own method, see the <a href="https://github.com/bdager/CHIRLA/blob/main/benchmark/README.md">benchmark README</a>.</p>
+  </section>
+
+  <!-- ================= Download ================= -->
+  <section id="download">
+    <h2>Download</h2>
+    <p class="lead">Pick the parts you need and copy the command. Most Re-ID work only needs the benchmark folders, not the raw videos.</p>
+    <div class="dl">
+      <form class="opts" id="dl-form" onsubmit="return false">
+        <fieldset>
+          <legend>Parts</legend>
+          <label><input type="checkbox" name="part" value="benchmark/reid/*" checked><span>Re-ID benchmark<small>Splits and crops for the four Re-ID scenarios</small></span></label>
+          <label><input type="checkbox" name="part" value="benchmark/tracking/*"><span>Tracking benchmark<small>Splits and crops for the two tracking scenarios</small></span></label>
+          <label><input type="checkbox" name="part" value="annotations/*"><span>Annotations<small>Per-frame boxes and IDs for every video (JSON)</small></span></label>
+          <label><input type="checkbox" name="part" value="videos/*"><span>Raw videos<small>All 70 AVI files; by far the largest part</small></span></label>
+        </fieldset>
+        <fieldset>
+          <legend>Format</legend>
+          <div class="row">
+            <label><input type="radio" name="fmt" value="py" checked><span>Python</span></label>
+            <label><input type="radio" name="fmt" value="cli"><span>Command line</span></label>
+          </div>
+        </fieldset>
+      </form>
+      <div class="code-box">
+        <button class="copy" type="button" data-copy="dl-code">Copy</button>
+        <pre><code id="dl-code"></code></pre>
+        <p class="small">Requires <code>pip install -U huggingface_hub</code>. The dataset is also mirrored on <a href="https://doi.org/10.57760/sciencedb.20543">Science Data Bank</a>, and a separate CLI downloader is described in the <a href="https://github.com/bdager/CHIRLA/blob/main/downloader/README.md">downloader instructions</a>.</p>
+        <p class="small">Each annotation file maps a frame number to the people in it: <code>{"1": [{"id": 4, "BboxP": [x1, y1, x2, y2]}, …]}</code>. Frames and IDs start at 1; negative IDs in the benchmark mark distractors.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Team ================= -->
+  <section id="team">
+    <h2>Team</h2>
+    <ul class="team">
+      <li><a href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Bessie+Dominguez-Dager" data-person="bessie"><span class="avatar"><img src="assets/team/bessie.jpg" alt="" data-i="BD" onerror="this.parentNode.textContent=this.dataset.i"></span><b>Bessie Dominguez-Dager</b><span>University of Alicante</span></a></li>
+      <li><a href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Felix+Escalona" data-person="felix"><span class="avatar"><img src="assets/team/felix.jpg" alt="" data-i="FE" onerror="this.parentNode.textContent=this.dataset.i"></span><b>Felix Escalona</b><span>University of Alicante</span></a></li>
+      <li><a href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Francisco+Gomez-Donoso" data-person="francisco"><span class="avatar"><img src="assets/team/francisco.jpg" alt="" data-i="FG" onerror="this.parentNode.textContent=this.dataset.i"></span><b>Francisco Gomez-Donoso</b><span>University of Alicante</span></a></li>
+      <li><a href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Miguel+Cazorla" data-person="miguel"><span class="avatar"><img src="assets/team/miguel.jpg" alt="" data-i="MC" onerror="this.parentNode.textContent=this.dataset.i"></span><b>Miguel Cazorla</b><span>University of Alicante</span></a></li>
+    </ul>
+  </section>
+
+  <!-- ================= Citation ================= -->
+  <section id="citation" class="narrow">
+    <h2>Citation</h2>
+    <div class="code-box">
+      <button class="copy" type="button" data-copy="bib">Copy</button>
+<pre><code id="bib">@article{dominguezdager2026chirla,
+  title   = {CHIRLA: Comprehensive High-resolution Identification and
+             Re-identification for Large-scale Analysis},
+  author  = {Dominguez-Dager, Bessie and Escalona, Felix and
+             Gomez-Donoso, Francisco and Cazorla, Miguel},
+  journal = {Scientific Data},
+  volume  = {13},
+  number  = {1},
+  pages   = {109},
+  year    = {2026},
+  doi     = {10.1038/s41597-025-06425-3}
+}</code></pre>
+    </div>
+  </section>
+
+  <section id="partners" aria-label="Institutions and funders">
+    <div class="logos">
+      <img src="assets/logos/ua.png" alt="University of Alicante" onerror="this.remove()">
+      <img src="assets/logos/rovit.png" alt="RoViT research group" onerror="this.remove()">
+      <img src="assets/logos/aei.png" alt="Agencia Estatal de Investigación" onerror="this.remove()">
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>CHIRLA Dataset © 2025–2026 The CHIRLA authors. The dataset is released under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+    <p>Funded by PID2022-138453OB-I00 (MICIU/AEI/10.13039/501100011033, ERDF “A way of making Europe”) and FPU23/02247. Contact: <a href="mailto:bessie.dominguez@ua.es">bessie.dominguez@ua.es</a>.</p>
+  </div>
+</footer>
+
+<!-- Generated by tools/build_explorer.py; the page falls back to placeholders if it is missing. -->
+<script src="assets/explorer/explorer_data.js"></script>
+<script>
+(function () {
+  /* ---------- Author profile links: replace with each person's Google Scholar profile ---------- */
+  var PROFILES = {
+    bessie: "https://scholar.google.es/citations?user=JBNPxeoAAAAJ&hl=es",    
+    felix: "https://scholar.google.es/citations?user=_r20fQEAAAAJ&hl=es",
+    francisco: "https://scholar.google.es/citations?user=NxJLrBAAAAAJ&hl=es",
+    miguel: "https://scholar.google.es/citations?user=1rgeSeEAAAAJ&hl=es"
+  };
+  document.querySelectorAll("a[data-person]").forEach(function (a) {
+    var url = PROFILES[a.getAttribute("data-person")];
+    if (url) a.href = url;
+  });
+
+  /* ---------- Explorer: data ---------- */
+  var DATA = window.CHIRLA_EXPLORER;
+  var demo = !DATA || !DATA.ids || !Object.keys(DATA.ids).length;
+  var CURATE = /curate/.test(location.hash);
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  if (demo) {
+    var dDates = ["2023-05-18", "2023-06-08", "2023-06-22", "2023-07-26", "2023-10-05", "2023-11-09", "2023-12-01", "2023-12-04", "2023-12-05", "2023-12-12"];
+    DATA = { ids: {}, sync: [] };
+    for (var i = 1; i <= 22; i++) {
+      var list = [];
+      dDates.forEach(function (dt, k) {
+        if ((i + k) % 3 === 0 || (i * k) % 7 === 1) {
+          var cam = 1 + ((i + k) % 7);
+          list.push({ key: "id_" + pad(i) + "/session_" + (k + 1) + "_c" + cam, src: null, full: null, seq: "Session " + (k + 1), cam: cam, date: dt, frame: 1000 + k, box: [420, 140, 600, 640], w: 1080, h: 720 });
+        }
+      });
+      if (list.length) DATA.ids[i] = list;
+    }
+    dDates.slice(0, 4).forEach(function (dt, k) {
+      var views = [];
+      for (var c = 1; c <= 7; c++) {
+        var people = [];
+        for (var p = 1; p <= 22; p++) {
+          if ((p + c + k) % 8 === 0) {
+            var x = 80 + ((p * 97) % 800), y = 120 + ((p * 41) % 200);
+            people.push({ id: p, box: [x, y, x + 150, y + 380] });
+          }
+        }
+        views.push({ cam: c, src: null, w: 1080, h: 720, people: people });
+      }
+      DATA.sync.push({ key: "sync/session_" + (k + 1), seq: "Session " + (k + 1), date: dt, frame: 1200, views: views });
+    });
+  } else {
+    document.getElementById("demo-note").hidden = true;
+  }
+
+  /* ---------- Explorer: helpers ---------- */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function parts(d) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ""); return m ? [+m[1], +m[2], +m[3]] : null; }
+  function fmtDate(d) { var p = parts(d); return p ? p[2] + " " + MONTHS[p[1] - 1] + " " + p[0] : (d || ""); }
+  function fmtDay(d) { var p = parts(d); return p ? p[2] + " " + MONTHS[p[1] - 1] : (d || ""); }
+  function fmtMonth(mk) { var y = mk.slice(0, 4), m = +mk.slice(5, 7); return MONTHS[m - 1] + " " + y; }
+  function idColor(id) { return "hsl(" + ((id * 67) % 360) + " 75% 38%)"; }
+  function listJoin(a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    for (var k in attrs || {}) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  var SIL = '<svg viewBox="0 0 60 140" aria-hidden="true"><circle class="ph-fig" cx="30" cy="20" r="14"/><rect class="ph-fig" x="12" y="38" width="36" height="58" rx="12"/><rect class="ph-fig" x="15" y="90" width="12" height="50" rx="5"/><rect class="ph-fig" x="33" y="90" width="12" height="50" rx="5"/></svg>';
+
+  /* A frame with people boxes drawn from the manifest. */
+  function stage(w, h, src, alt, people, opts) {
+    opts = opts || {};
+    var s = el("div", { "class": "stage" });
+    s.style.aspectRatio = w + " / " + h;
+    if (src) s.appendChild(el("img", { src: src, alt: alt, loading: "lazy" }));
+    else s.appendChild(el("div", { "class": "ph" }, alt));
+    (people || []).forEach(function (pp) {
+      var b = pp.box, isBtn = !!opts.onBox;
+      var box = el(isBtn ? "button" : "div", { "class": "pbox" });
+      if (isBtn) { box.type = "button"; box.setAttribute("aria-label", "Highlight ID " + pp.id); box.addEventListener("click", function () { opts.onBox(pp.id); }); }
+      box.style.setProperty("--c", idColor(pp.id));
+      box.style.left = (b[0] / w * 100) + "%";
+      box.style.top = (b[1] / h * 100) + "%";
+      box.style.width = ((b[2] - b[0]) / w * 100) + "%";
+      box.style.height = ((b[3] - b[1]) / h * 100) + "%";
+      if (b[1] / h < 0.06) box.classList.add("inside");
+      if (opts.highlight != null) box.classList.add(pp.id === opts.highlight ? "hl" : "dim");
+      box.appendChild(el("span", null, "ID " + pp.id));
+      s.appendChild(box);
+    });
+    return s;
+  }
+
+  /* Months covered by the dataset, and months that actually have sessions. */
+  var allDates = [];
+  Object.keys(DATA.ids).forEach(function (k) { DATA.ids[k].forEach(function (e) { if (parts(e.date)) allDates.push(e.date); }); });
+  DATA.sync.forEach(function (s) { if (parts(s.date)) allDates.push(s.date); });
+  allDates.sort();
+  var axis = [], sessionMonths = {};
+  allDates.forEach(function (d) { sessionMonths[d.slice(0, 7)] = 1; });
+  if (allDates.length) {
+    var a = parts(allDates[0]), z = parts(allDates[allDates.length - 1]);
+    for (var yy = a[0], mm = a[1]; yy < z[0] || (yy === z[0] && mm <= z[1]); mm++) {
+      if (mm > 12) { mm = 1; yy++; }
+      axis.push(yy + "-" + pad(mm));
+    }
+  }
+
+  /* ---------- One person over time ---------- */
+  var chips = document.getElementById("id-chips");
+  var timeline = document.getElementById("id-timeline");
+  var idSummary = document.getElementById("id-summary");
+  var idKeys = Object.keys(DATA.ids).filter(function (k) { return DATA.ids[k].length; }).sort(function (a, b) { return a - b; });
+  var currentId = null;
+
+  function card(id, it, index) {
+    var fig = el("figure", { "class": "card" });
+    var btn = el("button", { type: "button", "aria-label": "Enlarge ID " + id + ", " + fmtDate(it.date) + ", camera " + it.cam });
+    var frame = el("div", { "class": "frame" });
+    if (it.src) frame.appendChild(el("img", { src: it.src, alt: "", loading: "lazy" }));
+    else frame.innerHTML = SIL;
+    frame.appendChild(el("span", { "class": "zoom", "aria-hidden": "true" })).innerHTML = '<i class="fa-solid fa-magnifying-glass-plus"></i>';
+    btn.appendChild(frame);
+    btn.addEventListener("click", function () { openLB(id, index); });
+    fig.appendChild(btn);
+    var cap = el("figcaption");
+    cap.appendChild(el("b", null, it.date ? fmtDay(it.date) : it.seq));
+    cap.appendChild(el("span", null, (it.date ? it.seq + ", " : "") + "C" + it.cam));
+    if (CURATE && it.key) cap.appendChild(el("code", { "class": "key" }, it.key));
+    fig.appendChild(cap);
+    return fig;
+  }
+
+  function daysBetween(a, b) { var pa = parts(a), pb = parts(b); return Math.round((Date.UTC(pb[0], pb[1] - 1, pb[2]) - Date.UTC(pa[0], pa[1] - 1, pa[2])) / 864e5); }
+  function elapsed(days) {
+    if (days < 14) return days + (days === 1 ? " day later" : " days later");
+    if (days < 56) return Math.round(days / 7) + " weeks later";
+    var m = Math.round(days / 30.44);
+    return m + (m === 1 ? " month later" : " months later");
+  }
+  function gapSeg(label) {
+    var seg = el("div", { "class": "seg gap" });
+    seg.appendChild(el("div", { "class": "mhead" }, label));
+    return seg;
+  }
+
+  function showId(id) {
+    currentId = id;
+    chips.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.id === id ? "true" : "false"); });
+    var items = DATA.ids[id] || [];
+    var byMonth = {}, months = [], undated = [], cams = {}, sessions = {};
+    items.forEach(function (it, i) {
+      cams[it.cam] = 1; sessions[it.seq] = 1;
+      if (parts(it.date)) {
+        var mk = it.date.slice(0, 7);
+        if (!byMonth[mk]) { byMonth[mk] = []; months.push(mk); }
+        byMonth[mk].push(i);
+      } else undated.push(i);
+    });
+    months.sort();
+    timeline.innerHTML = "";
+    // Only months where this person has crops; a jump of more than one month
+    // is shown as a dashed stretch labelled with the time that passed.
+    months.forEach(function (mk, k) {
+      if (k > 0) {
+        var prev = months[k - 1];
+        var monthsApart = (+mk.slice(0, 4) - +prev.slice(0, 4)) * 12 + (+mk.slice(5, 7) - +prev.slice(5, 7));
+        if (monthsApart > 1) {
+          var lastBefore = items[byMonth[prev][byMonth[prev].length - 1]].date;
+          var firstAfter = items[byMonth[mk][0]].date;
+          timeline.appendChild(gapSeg(elapsed(daysBetween(lastBefore, firstAfter))));
+        }
+      }
+      var seg = el("div", { "class": "seg" });
+      seg.appendChild(el("div", { "class": "mhead" }, fmtMonth(mk)));
+      var row = el("div", { "class": "cards" });
+      byMonth[mk].forEach(function (i) { row.appendChild(card(id, items[i], i)); });
+      seg.appendChild(row);
+      timeline.appendChild(seg);
+    });
+    if (undated.length) {
+      var useg = el("div", { "class": "seg" });
+      useg.appendChild(el("div", { "class": "mhead" }, "Undated"));
+      var urow = el("div", { "class": "cards" });
+      undated.forEach(function (i) { urow.appendChild(card(id, items[i], i)); });
+      useg.appendChild(urow);
+      timeline.appendChild(useg);
+    }
+    var nS = Object.keys(sessions).length, nC = Object.keys(cams).length;
+    var span = "";
+    if (months.length) {
+      var f = fmtMonth(months[0]), l = fmtMonth(months[months.length - 1]);
+      span = f === l ? ", " + f : ", " + (f.slice(-4) === l.slice(-4) ? f.slice(0, -5) : f) + " to " + l;
+    }
+    idSummary.textContent = "Example crops of ID " + id + " from " + nS + (nS === 1 ? " session" : " sessions") + " and " + nC + (nC === 1 ? " camera" : " cameras") + span + ".";
+    timeline.scrollLeft = 0;
+  }
+  idKeys.forEach(function (key) {
+    var b = el("button", { "class": "chip idchip", type: "button", "data-id": key, "aria-pressed": "false", "aria-label": "ID " + key }, key);
+    b.addEventListener("click", function () { showId(key); });
+    chips.appendChild(b);
+  });
+  // People in the dataset but not in this selection: point to the full dataset.
+  var hiddenIds = (DATA.total_ids || 0) - idKeys.length;
+  if (hiddenIds > 0) {
+    chips.appendChild(el("a", {
+      "class": "chip morechip", href: "https://huggingface.co/datasets/bdager/CHIRLA/viewer",
+      title: hiddenIds + " more " + (hiddenIds === 1 ? "person" : "people") + " in the full dataset on Hugging Face"
+    }, "+" + hiddenIds + " more"));
+  }
+
+  /* ---------- One moment, seven cameras ---------- */
+  var sessionsBox = document.getElementById("sync-sessions");
+  var grid = document.getElementById("sync-grid");
+  var syncSummary = document.getElementById("sync-summary");
+  var planSvg = document.querySelector("#environment .plan svg");
+
+  function miniMap(onCams, hlCams) {
+    var svg = planSvg.cloneNode(true);
+    svg.removeAttribute("role");
+    svg.setAttribute("aria-hidden", "true");
+    svg.classList.add("mini");
+    svg.querySelectorAll(".area").forEach(function (t) { t.remove(); });
+    svg.querySelectorAll(".room").forEach(function (g) { g.removeAttribute("tabindex"); g.removeAttribute("role"); g.removeAttribute("aria-label"); g.removeAttribute("aria-pressed"); g.classList.remove("active"); });
+    svg.querySelectorAll(".cam").forEach(function (g) {
+      var c = +g.getAttribute("data-cam");
+      if (onCams[c]) g.classList.add("on");
+      if (hlCams[c]) g.classList.add("hl");
+    });
+    return svg;
+  }
+
+  function showSync(idx, hl) {
+    if (idx < 0 || !DATA.sync[idx]) return;
+    hl = hl == null ? null : +hl;
+    sessionsBox.querySelectorAll(".chip").forEach(function (b, j) { b.setAttribute("aria-pressed", j === idx ? "true" : "false"); });
+    var s = DATA.sync[idx];
+    grid.innerHTML = "";
+    var onCams = {}, hlCams = {};
+    s.views.slice().sort(function (a, b) { return a.cam - b.cam; }).forEach(function (v) {
+      var people = v.people || [];
+      if (people.length) onCams[v.cam] = 1;
+      var hasHl = hl != null && people.some(function (p) { return p.id === hl; });
+      if (hasHl) hlCams[v.cam] = 1;
+      var fig = el("figure", { "class": "view" + (hasHl ? " has-hl" : "") });
+      fig.appendChild(stage(v.w || 1080, v.h || 720, v.src, v.src ? "Camera " + v.cam + ", " + s.seq : "Frame from camera " + v.cam, people, {
+        highlight: hl,
+        onBox: function (pid) { showSync(idx, pid === hl ? null : pid); }
+      }));
+      var cap = el("figcaption");
+      cap.appendChild(el("b", null, "C" + v.cam));
+      cap.appendChild(document.createTextNode(people.length ? people.length + (people.length === 1 ? " person" : " people") : "nobody in view"));
+      fig.appendChild(cap);
+      grid.appendChild(fig);
+    });
+    var mfig = el("figure", { "class": "view map" });
+    var mbox = el("div", { "class": "mapbox" });
+    mbox.appendChild(miniMap(onCams, hlCams));
+    mfig.appendChild(mbox);
+    mfig.appendChild(el("figcaption", null, hl != null ? "Teal: someone in view. Ringed: ID " + hl + "." : "Teal: cameras with someone in view."));
+    grid.appendChild(mfig);
+
+    syncSummary.innerHTML = "";
+    var line = s.seq + (s.date ? ", recorded " + fmtDate(s.date) : "") + (s.frame ? ", frame " + s.frame : "") + ". ";
+    if (hl == null) {
+      line += "Select a box to highlight that person in every view.";
+      syncSummary.appendChild(document.createTextNode(line));
+    } else {
+      var seen = Object.keys(hlCams).map(function (c) { return "C" + c; });
+      line += seen.length ? "ID " + hl + " is visible in " + listJoin(seen) + "." : "ID " + hl + " was recorded in this session but isn’t in view at this moment.";
+      syncSummary.appendChild(document.createTextNode(line));
+      syncSummary.appendChild(el("br"));
+      if (DATA.ids[hl] && DATA.ids[hl].length) {
+        var follow = el("button", { type: "button", "class": "inline-btn" }, "Follow ID " + hl + " over time");
+        follow.addEventListener("click", function () { selectTab(tabs[0]); showId(String(hl)); });
+        syncSummary.appendChild(follow);
+      }
+      var clear = el("button", { type: "button", "class": "inline-btn" }, "Clear highlight");
+      clear.addEventListener("click", function () { showSync(idx, null); });
+      syncSummary.appendChild(clear);
+    }
+    if (CURATE && s.key) syncSummary.appendChild(el("code", { "class": "key" }, s.key + "@" + s.frame));
+  }
+  DATA.sync.forEach(function (s, j) {
+    var b = el("button", { "class": "chip", type: "button", "aria-pressed": "false" }, s.date ? fmtDate(s.date) : s.seq);
+    b.addEventListener("click", function () { showSync(j, null); });
+    sessionsBox.appendChild(b);
+  });
+
+  /* ---------- Tabs ---------- */
+  var tabs = document.querySelectorAll(".tab");
+  function selectTab(t) {
+    tabs.forEach(function (x) {
+      var on = x === t;
+      x.setAttribute("aria-selected", on ? "true" : "false");
+      x.tabIndex = on ? 0 : -1;
+      document.getElementById(x.getAttribute("aria-controls")).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { selectTab(t); });
+    t.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+        var nx = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+        selectTab(nx); nx.focus();
+      }
+    });
+  });
+
+  /* ---------- Enlarged view ---------- */
+  var lb = document.getElementById("lb");
+  var lbStage = document.getElementById("lb-stage");
+  var lbCap = document.getElementById("lb-caption");
+  var lbPrev = document.getElementById("lb-prev");
+  var lbNext = document.getElementById("lb-next");
+  var lbSync = document.getElementById("lb-sync");
+  var lbState = { id: null, i: 0 };
+  function syncIndexFor(seq) { for (var j = 0; j < DATA.sync.length; j++) if (DATA.sync[j].seq === seq) return j; return -1; }
+  function renderLB() {
+    var items = DATA.ids[lbState.id], it = items[lbState.i], pid = +lbState.id;
+    lbStage.innerHTML = "";
+    if (it.full || !it.src) {
+      lbStage.appendChild(stage(it.w || 1080, it.h || 720, it.full || null, it.full ? "Camera " + it.cam + " frame with ID " + pid : "Full camera frame", it.box ? [{ id: pid, box: it.box }] : [], { highlight: pid }));
+    } else {
+      lbStage.appendChild(el("img", { "class": "lb-crop", src: it.src, alt: "ID " + pid + ", camera " + it.cam }));
+    }
+    lbCap.textContent = "ID " + pid + (it.date ? ", " + fmtDate(it.date) : "") + ", " + it.seq + ", camera C" + it.cam + (it.frame ? ", frame " + it.frame : "") + " (" + (lbState.i + 1) + " of " + items.length + ")";
+    if (CURATE && it.key) lbCap.appendChild(el("code", { "class": "key" }, it.key));
+    lbPrev.disabled = lbState.i === 0;
+    lbNext.disabled = lbState.i === items.length - 1;
+    lbSync.disabled = syncIndexFor(it.seq) < 0;
+  }
+  function openLB(id, i) {
+    lbState = { id: id, i: i };
+    renderLB();
+    if (!lb.open) lb.showModal();
+  }
+  function stepLB(d) {
+    var n = lbState.i + d;
+    if (n >= 0 && n < DATA.ids[lbState.id].length) { lbState.i = n; renderLB(); }
+  }
+  lbPrev.addEventListener("click", function () { stepLB(-1); });
+  lbNext.addEventListener("click", function () { stepLB(1); });
+  document.getElementById("lb-close").addEventListener("click", function () { lb.close(); });
+  lb.addEventListener("click", function (e) { if (e.target === lb) lb.close(); });
+  lb.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft") { e.preventDefault(); stepLB(-1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); stepLB(1); }
+  });
+  lbSync.addEventListener("click", function () {
+    var it = DATA.ids[lbState.id][lbState.i], j = syncIndexFor(it.seq);
+    if (j < 0) return;
+    lb.close();
+    selectTab(tabs[1]);
+    showSync(j, +lbState.id);
+    document.getElementById("explore").scrollIntoView({ block: "start" });
+  });
+
+  if (idKeys.length) showId(idKeys[0]);
+  if (DATA.sync.length) showSync(0, null);
+
+  /* ---------- Rooms ---------- */
+  var rooms = {
+    O1: ["Office O1", "A small office connected to laboratory L2. Camera C1 sits in the corner opposite the door, facing it."],
+    L1: ["Laboratory L1", "The largest lab, opening onto the corridor. Camera C7 faces the door from the opposite corner and is the only camera on WiFi."],
+    L2: ["Laboratory L2", "Connected to the office, laboratory L3 and the corridor. C2 faces the main door; C3 watches the door to office O1."],
+    L3: ["Laboratory L3", "Connected to L2 and the corridor. Camera C4 is mounted above the L2–L3 door, pointing at it."],
+    H1: ["Corridor H1", "The hallway linking all three labs, covered by C5 and C6. Most of the low-resolution, distant crops come from here."]
+  };
+  var groups = document.querySelectorAll("#environment .room");
+  function selectRoom(g) {
+    groups.forEach(function (x) { x.classList.remove("active"); x.setAttribute("aria-pressed", "false"); });
+    g.classList.add("active"); g.setAttribute("aria-pressed", "true");
+    var r = rooms[g.getAttribute("data-room")];
+    document.getElementById("room-title").textContent = r[0];
+    document.getElementById("room-text").textContent = r[1];
+  }
+  groups.forEach(function (g) {
+    g.setAttribute("aria-pressed", "false");
+    g.addEventListener("click", function () { selectRoom(g); });
+    g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectRoom(g); } });
+  });
+
+  /* ---------- Download helper ---------- */
+  var form = document.getElementById("dl-form");
+  var out = document.getElementById("dl-code");
+  function buildCmd() {
+    var parts = Array.prototype.map.call(form.querySelectorAll('input[name="part"]:checked'), function (x) { return x.value; });
+    var fmt = form.querySelector('input[name="fmt"]:checked').value;
+    if (!parts.length) { out.textContent = "# Select at least one part on the left."; return; }
+    var all = parts.length === 4;
+    if (fmt === "py") {
+      out.textContent = "from huggingface_hub import snapshot_download\n\nsnapshot_download(\n    repo_id=\"bdager/CHIRLA\",\n    repo_type=\"dataset\",\n" +
+        (all ? "" : "    allow_patterns=[" + parts.map(function (p) { return "\"" + p + "\""; }).join(", ") + "],\n") +
+        "    local_dir=\"CHIRLA\",\n)";
+    } else {
+      out.textContent = "hf download bdager/CHIRLA --repo-type dataset \\\n" +
+        (all ? "" : parts.map(function (p) { return "  --include \"" + p + "\" \\\n"; }).join("")) +
+        "  --local-dir CHIRLA";
+    }
+  }
+  form.addEventListener("change", buildCmd);
+  buildCmd();
+
+  /* ---------- Copy buttons ---------- */
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var txt = document.getElementById(btn.dataset.copy).innerText;
+      navigator.clipboard.writeText(txt).then(function () {
+        btn.textContent = "Copied";
+        setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+      }, function () { btn.textContent = "Select to copy"; });
+    });
+  });
+
+  /* ---------- Highlight current section in nav ---------- */
+  var links = document.querySelectorAll(".nav li a");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle("current", a.getAttribute("href") === "#" + en.target.id); });
+        }
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    document.querySelectorAll("main section[id]").forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

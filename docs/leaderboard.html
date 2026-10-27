@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CHIRLA Leaderboard: Long-term Person Re-identification and Tracking</title>
+<meta name="description" content="Leaderboard for the CHIRLA benchmark: long-term, multi-camera person re-identification and tracking. Baselines and community results with citations.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='6' width='24' height='22' fill='none' stroke='%2300A3B4' stroke-width='3'/><rect x='4' y='1' width='13' height='7' fill='%2300A3B4'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans:wght@400;600&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --bg: #FFFFFF; --text: #363636; --muted: #6B6B6B; --link: #3273DC;
+  --btn: #363636; --btn-text: #FFFFFF; --soft: #F5F5F5; --line: #E4E4E4;
+  --accent: #00A3B4; --accent-ink: #FFFFFF; --accent-soft: #E3F5F7;
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16191D; --text: #E2E4E7; --muted: #A3A9B1; --link: #7EB0FF;
+    --btn: #E2E4E7; --btn-text: #16191D; --soft: #20252B; --line: #31373F;
+    --accent: #3CC8D6; --accent-ink: #10181A; --accent-soft: #173A3E;
+    --nav-bg: rgba(22, 25, 29, 0.9);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16191D; --text: #E2E4E7; --muted: #A3A9B1; --link: #7EB0FF;
+  --btn: #E2E4E7; --btn-text: #16191D; --soft: #20252B; --line: #31373F;
+  --accent: #3CC8D6; --accent-ink: #10181A; --accent-soft: #173A3E;
+  --nav-bg: rgba(22, 25, 29, 0.9);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 1rem/1.6 "Noto Sans", "Helvetica Neue", Arial, sans-serif; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 20; background: var(--nav-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.container { max-width: 1240px; margin: 0 auto; padding: 0 1.25rem; }
+.narrow { max-width: 760px; margin-left: auto; margin-right: auto; }
+section { padding: 3rem 0 0; }
+h1, h2, h3 { font-family: "Google Sans", "Noto Sans", sans-serif; font-weight: 500; }
+h2 { font-size: 2rem; text-align: center; margin: 0 0 0.6rem; }
+h3 { font-size: 1.25rem; margin: 1.75rem 0 0.6rem; }
+.lead { text-align: center; color: var(--muted); max-width: 680px; margin: 0 auto 1.5rem; }
+
+/* Nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--nav-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.nav .container { display: flex; align-items: center; gap: 1.25rem; height: 56px; }
+.nav .brand { font-family: "Fredoka", "Google Sans", sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 0.4rem; }
+.nav .brand i { color: var(--accent); font-size: 1rem; }
+.nav ul { display: flex; gap: 0.25rem; list-style: none; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; flex: 1; }
+.nav ul::-webkit-scrollbar { display: none; }
+.nav li a { display: block; padding: 0.35rem 0.7rem; border-radius: 999px; color: var(--muted); white-space: nowrap; font-size: 0.93rem; text-decoration: none; }
+.nav li a:hover { color: var(--text); background: var(--soft); }
+.nav .back { white-space: nowrap; background: var(--btn); color: var(--btn-text); border-radius: 999px; padding: 0.35rem 0.9rem; font-size: 0.9rem; text-decoration: none; }
+@media (max-width: 640px) { .nav .back { display: none; } }
+
+/* Hero */
+.hero { text-align: center; padding: 3rem 0 0; }
+.hero h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); margin: 0 0 0.6rem; line-height: 1.15; }
+.hero h1 .mark { font-family: "Fredoka", "Google Sans", sans-serif; font-weight: 700; color: var(--accent); }
+.meta { color: var(--muted); font-size: 0.92rem; margin: 0.4rem 0 0; }
+.buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
+.buttons a { display: inline-flex; align-items: center; gap: 0.45rem; background: var(--btn); color: var(--btn-text); border-radius: 999px; padding: 0.45rem 1.05rem; font-size: 0.95rem; text-decoration: none; }
+.buttons a.ghost { background: transparent; color: var(--text); border: 1.5px solid var(--line); }
+.buttons a:hover { opacity: 0.85; text-decoration: none; }
+
+/* Tabs and controls */
+.tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 1rem; }
+.tab { font: 500 0.95rem "Google Sans", "Noto Sans", sans-serif; background: var(--soft); color: var(--text); border: 0; border-radius: 999px; padding: 0.5rem 1.1rem; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--btn); color: var(--btn-text); }
+.tab .count { opacity: 0.7; margin-left: 0.3rem; font-size: 0.85em; }
+.panel[hidden] { display: none; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; margin: 0 0 0.75rem; font-size: 0.92rem; }
+.controls label { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--muted); }
+.controls input[type="search"], .controls select { font: inherit; color: var(--text); background: var(--bg); border: 1.5px solid var(--line); border-radius: 6px; padding: 0.35rem 0.55rem; }
+.controls input[type="search"] { min-width: 13rem; }
+.controls input[type="checkbox"] { accent-color: var(--accent); width: 1rem; height: 1rem; }
+.controls .spacer { flex: 1; }
+.controls .shown { color: var(--muted); }
+
+/* Leaderboard tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table.lb { border-collapse: separate; border-spacing: 0; width: 100%; font-variant-numeric: tabular-nums; font-size: 0.88rem; }
+table.lb th, table.lb td { padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--bg); }
+table.lb thead th { position: sticky; top: 0; z-index: 2; font-weight: 600; font-size: 0.82rem; }
+table.lb thead tr:first-child th { border-bottom: 0; color: var(--text); text-align: center; font-family: "Google Sans", "Noto Sans", sans-serif; font-size: 0.88rem; }
+table.lb thead tr:first-child th.grp { border-left: 1px solid var(--line); border-bottom: 2px solid var(--accent); }
+table.lb thead tr:nth-child(2) th { top: 2.05rem; border-bottom: 1.5px solid var(--text); }
+table.lb td.num, table.lb th.num { text-align: right; }
+table.lb .gstart { border-left: 1px solid var(--line); }
+table.lb .sticky1 { position: sticky; left: 0; z-index: 1; width: 2.6rem; min-width: 2.6rem; text-align: right; color: var(--muted); }
+table.lb .sticky2 { position: sticky; left: 2.6rem; z-index: 1; border-right: 1px solid var(--line); min-width: 17rem; white-space: normal; }
+table.lb thead .sticky1, table.lb thead .sticky2 { z-index: 3; }
+table.lb tbody tr:hover td { background: var(--soft); }
+table.lb .avg { background: var(--accent-soft); font-weight: 600; }
+table.lb tbody tr:hover td.avg { background: var(--accent-soft); }
+table.lb .best { font-weight: 700; }
+table.lb .second { text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; }
+.sortbtn { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; }
+.sortbtn .arr { font-size: 0.7em; color: var(--muted); }
+.sortbtn[aria-sort="descending"] .arr::after { content: "▼"; color: var(--accent); }
+.sortbtn[aria-sort="ascending"] .arr::after { content: "▲"; color: var(--accent); }
+.sortbtn:not([aria-sort]) .arr::after { content: "↕"; }
+.dir { color: var(--muted); font-weight: 400; }
+.mname { font-weight: 600; }
+.tags { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.2rem; }
+.tag { font-size: 0.72rem; line-height: 1.5; padding: 0 0.4rem; border-radius: 4px; background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
+.tag.base { background: transparent; }
+.tag.new { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.tag.verified { color: var(--accent); border-color: var(--accent); background: transparent; }
+.citebtn { font: 500 0.8rem "Noto Sans", sans-serif; background: var(--soft); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 0.15rem 0.6rem; cursor: pointer; }
+.citebtn:hover { border-color: var(--accent); }
+.legend { color: var(--muted); font-size: 0.85rem; margin: 0.6rem 0 0; }
+.legend b { color: var(--text); }
+.legend u { text-decoration-color: var(--muted); text-underline-offset: 3px; }
+.status { padding: 2rem 1rem; text-align: center; color: var(--muted); }
+.empty { border: 1.5px dashed var(--line); border-radius: 10px; padding: 2.25rem 1.5rem; text-align: center; max-width: 760px; margin: 0 auto; }
+.empty i { font-size: 1.8rem; color: var(--accent); }
+.empty h3 { margin: 0.6rem 0 0.4rem; }
+.empty p { color: var(--muted); margin: 0 auto 1rem; max-width: 560px; }
+
+/* Protocol and submit */
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+@media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+.card { background: var(--soft); border-radius: 8px; padding: 1.1rem 1.25rem; }
+.card h3 { margin: 0 0 0.5rem; font-size: 1.15rem; }
+.card h3 i { color: var(--accent); margin-right: 0.4rem; }
+.card ul, .card ol { margin: 0; padding-left: 1.2rem; }
+.card li { margin: 0.3rem 0; font-size: 0.95rem; }
+code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.88em; }
+pre { background: var(--soft); border-radius: 6px; padding: 0.85rem 1rem; overflow-x: auto; font: 0.8rem/1.5 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; margin: 0.4rem 0 0; }
+
+/* Cite dialog */
+dialog.cite { border: 0; padding: 0; background: var(--bg); color: var(--text); border-radius: 10px; width: min(760px, 94vw); max-height: 88vh; overflow: auto; }
+dialog.cite::backdrop { background: rgba(0, 0, 0, 0.6); }
+.cite-body { padding: 1.25rem; }
+.cite-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.cite-head h3 { margin: 0; }
+.cite-head p { margin: 0.15rem 0 0; color: var(--muted); font-size: 0.9rem; }
+.cite-item { border-top: 1px solid var(--line); padding: 0.85rem 0 0.25rem; margin-top: 0.85rem; }
+.cite-item .role { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+.cite-item .ref { margin: 0.1rem 0 0; font-size: 0.92rem; }
+.dlg-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.dlg-actions button { font: 500 0.88rem "Google Sans", "Noto Sans", sans-serif; background: var(--soft); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 0.35rem 0.85rem; cursor: pointer; }
+.dlg-actions button.primary { background: var(--btn); color: var(--btn-text); border-color: var(--btn); }
+
+footer { margin-top: 3.5rem; padding: 2rem 0 2.5rem; background: var(--soft); font-size: 0.88rem; color: var(--muted); }
+footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Sections">
+  <div class="container">
+    <a class="brand" href="index.html"><i class="fa-regular fa-square"></i>CHIRLA</a>
+    <ul>
+      <li><a href="#reid">Re-identification</a></li>
+      <li><a href="#tracking">Tracking</a></li>
+      <li><a href="#protocol">Protocol</a></li>
+      <li><a href="#submit">Submit</a></li>
+    </ul>
+    <a class="back" href="index.html">Dataset page</a>
+  </div>
+</nav>
+
+<header class="hero container">
+  <h1><span class="mark">CHIRLA</span> Leaderboard</h1>
+  <p class="lead">Results on the CHIRLA benchmark for long-term person re-identification and tracking. Baselines come from the CHIRLA paper; new results are added as researchers submit them.</p>
+  <p class="meta" id="meta">Loading results…</p>
+  <ul class="buttons">
+    <li><a href="#submit"><i class="fa-solid fa-plus"></i>Submit a result</a></li>
+    <li><a class="ghost" href="#protocol"><i class="fa-solid fa-list-check"></i>Benchmark protocol</a></li>
+  </ul>
+</header>
+
+<main class="container">
+
+  <!-- ================= Re-ID ================= -->
+  <section id="reid">
+    <h2>Person Re-identification</h2>
+    <p class="lead">Rank-1, Rank-5, Rank-10 (CMC) and mAP for the four scenarios, averaged over subsets. Click any column to sort.</p>
+    <div class="tabs" role="tablist" aria-label="Re-identification tracks">
+      <button class="tab" role="tab" id="tab-closed" aria-controls="panel-closed" aria-selected="true">Closed-set<span class="count" id="count-closed"></span></button>
+      <button class="tab" role="tab" id="tab-open" aria-controls="panel-open" aria-selected="false" tabindex="-1">Open-set<span class="count" id="count-open"></span></button>
+    </div>
+
+    <div class="panel" id="panel-closed" role="tabpanel" aria-labelledby="tab-closed">
+      <div class="controls">
+        <label>Search <input type="search" id="reid-q" placeholder="Method, recipe, paper…"></label>
+        <label>Pretraining
+          <select id="reid-pre"><option value="">All</option><option>Market-1501</option><option>DukeMTMC</option><option>MSMT17</option><option value="none">Not specified</option></select>
+        </label>
+        <label>Input
+          <select id="reid-input"><option value="">All</option><option>256×128</option><option>384×128</option></select>
+        </label>
+        <label>Source
+          <select id="reid-kind"><option value="">All</option><option value="baseline">Paper baselines</option><option value="community">Community</option></select>
+        </label>
+        <label><input type="checkbox" id="reid-ranks"> Show Rank-5 and Rank-10</label>
+        <span class="spacer"></span>
+        <span class="shown" id="reid-shown" aria-live="polite"></span>
+      </div>
+      <div class="table-wrap"><table class="lb" id="reid-table"></table></div>
+      <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among the rows shown. Tags list the training recipe, pretraining data, input size and source of the weights; rows without a <span class="tag base">community</span> tag are baselines from the paper. <b>Mean</b> columns average Rank-1 and mAP over the four scenarios; the table is ranked by mean mAP by default.</p>
+    </div>
+
+    <div class="panel" id="panel-open" role="tabpanel" aria-labelledby="tab-open" hidden>
+      <div id="open-content"></div>
+    </div>
+  </section>
+
+  <!-- ================= Tracking ================= -->
+  <section id="tracking">
+    <h2>Person Tracking</h2>
+    <p class="lead">CLEAR MOT metrics on the full test set (8 sequences, 56 videos) and on the two occlusion scenarios. Arrows show whether higher or lower is better.</p>
+    <div class="controls">
+      <label>Search <input type="search" id="trk-q" placeholder="Tracker, appearance model…"></label>
+      <label>Source
+        <select id="trk-kind"><option value="">All</option><option value="baseline">Paper baselines</option><option value="community">Community</option></select>
+      </label>
+      <label><input type="checkbox" id="trk-detail"> Show MT, ML, FN, FP and FM</label>
+      <span class="spacer"></span>
+      <span class="shown" id="trk-shown" aria-live="polite"></span>
+    </div>
+    <div class="table-wrap"><table class="lb" id="trk-table"></table></div>
+    <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among the rows shown. Paper baselines use YOLO11n detections and each tracker’s default parameters.</p>
+  </section>
+
+  <!-- ================= Protocol ================= -->
+  <section id="protocol">
+    <h2>Benchmark Protocol</h2>
+    <p class="lead">Results are only comparable when everyone follows the same rules. Full details are in the <a href="https://www.nature.com/articles/s41597-025-06425-3">paper</a> and the <a href="https://github.com/bdager/CHIRLA/blob/main/benchmark/README.md">benchmark README</a>.</p>
+    <div class="cols">
+      <div class="card">
+        <h3><i class="fa-solid fa-user-check"></i>Re-identification</h3>
+        <ul>
+          <li>Four scenarios: reappearance, multi-camera, multi-camera long-term and long-term.</li>
+          <li>Each training subset is the gallery and the matching test subset is the query.</li>
+          <li>Subsets <code>train_0</code> and <code>test_0</code> are reserved for tuning and excluded from evaluation.</li>
+          <li>Report the average over all remaining subsets of each scenario.</li>
+          <li>Closed-set: distractors (negative IDs) are removed from the test sets. Open-set: distractors are kept.</li>
+          <li>Report the input size, pretraining data and whether CHIRLA data was used for training.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><i class="fa-solid fa-route"></i>Tracking</h3>
+        <ul>
+          <li>Tune on the two training sequences only; evaluate on the eight test sequences (56 videos).</li>
+          <li>Report MOTA, IDF1, MT, ML, FN, FP, IDSW and FM on the full test set.</li>
+          <li>For the two occlusion scenarios, match each ground-truth box to the prediction with the highest IoU (&gt; 0.5) and report MOTA, IDF1 and IDSW.</li>
+          <li>Report the detector and any appearance model you use.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Submit ================= -->
+  <section id="submit">
+    <h2>Submit a Result</h2>
+    <p class="lead">Evaluated a method on CHIRLA? Add it to the leaderboard so others can compare against it and cite your work.</p>
+    <div class="cols">
+      <div class="card">
+        <h3><i class="fa-solid fa-file-circle-plus"></i>Option 1: submission form</h3>
+        <ol>
+          <li>Run your method following the protocol above.</li>
+          <li>Open the <a href="https://github.com/bdager/CHIRLA/issues/new?template=submit-result.yml">submission form</a> on GitHub.</li>
+          <li>Fill in the method, setup, results, and a link to your paper or code, plus its BibTeX.</li>
+        </ol>
+        <p style="margin:0.6rem 0 0;font-size:0.92rem">We review each submission and add it, usually within a week.</p>
+      </div>
+      <div class="card">
+        <h3><i class="fa-solid fa-code-pull-request"></i>Option 2: pull request</h3>
+        <ol>
+          <li>Add your entry to <a href="https://github.com/bdager/CHIRLA/blob/main/docs/leaderboard/results.json"><code>docs/leaderboard/results.json</code></a>, and your paper under <code>papers</code>.</li>
+          <li>Run <code>python tools/validate_results.py</code> to check the format.</li>
+          <li>Open a pull request; the same check runs automatically.</li>
+        </ol>
+      </div>
+    </div>
+    <h3 class="narrow">What a Re-ID entry looks like</h3>
+<pre class="narrow"><code>{
+  "id": "my-method-r50",
+  "method": "MyMethod (ResNet50)",
+  "recipe": null, "pretrain": "MSMT17", "input": "256×128", "weights": "own training",
+  "cite": ["myname2027method"], "reported_in": "myname2027method",
+  "kind": "community", "verified": false, "added": "2027-02-01",
+  "code": "https://github.com/…",
+  "results": {
+    "long_term":              { "r1": 0.0, "r5": 0.0, "r10": 0.0, "map": 0.0 },
+    "multi_camera_long_term": { "r1": 0.0, "r5": 0.0, "r10": 0.0, "map": 0.0 },
+    "multi_camera":           { "r1": 0.0, "r5": 0.0, "r10": 0.0, "map": 0.0 },
+    "reappearance":           { "r1": 0.0, "r5": 0.0, "r10": 0.0, "map": 0.0 }
+  }
+}</code></pre>
+    <p class="narrow" style="font-size:0.92rem;color:var(--muted);margin-top:0.75rem">Entries marked <span class="tag verified">verified</span> have been reproduced by the CHIRLA team or come with public code and weights. If you use the leaderboard, please also cite the CHIRLA paper.</p>
+  </section>
+
+</main>
+
+<dialog class="cite" id="cite-dlg" aria-labelledby="cite-title">
+  <div class="cite-body">
+    <div class="cite-head">
+      <div><h3 id="cite-title">Cite</h3><p id="cite-sub"></p></div>
+      <div class="dlg-actions">
+        <button type="button" class="primary" id="cite-copy">Copy all BibTeX</button>
+        <button type="button" id="cite-close">Close</button>
+      </div>
+    </div>
+    <div id="cite-list"></div>
+  </div>
+</dialog>
+
+<footer>
+  <div class="container">
+    <p>CHIRLA: Comprehensive High-resolution Identification and Re-identification for Large-scale Analysis. <a href="index.html">Dataset page</a>, <a href="https://huggingface.co/datasets/bdager/CHIRLA">Hugging Face</a>, <a href="https://github.com/bdager/CHIRLA">GitHub</a>.</p>
+    <p>CHIRLA Dataset © 2025–2026 The CHIRLA authors. The dataset is released under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Leaderboard data: <a href="leaderboard/results.json">results.json</a>. Contact: <a href="mailto:bessie.dominguez@ua.es">bessie.dominguez@ua.es</a>.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function fmtDate(d) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ""); return m ? (+m[3]) + " " + MONTHS[+m[2] - 1] + " " + m[1] : d; }
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    for (var k in attrs || {}) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function fmt(v, isInt) { return v == null ? "–" : isInt ? Number(v).toLocaleString("en-US") : Number(v).toFixed(2); }
+
+  var DATA, PAPERS;
+
+  /* ---------- Citations ---------- */
+  function authorsShort(a) { if (!a || !a.length) return ""; var first = a[0].split(",")[0]; return a.length > 2 || a[a.length - 1] === "others" ? first + " et al." : a.map(function (x) { return x.split(",")[0]; }).join(" and "); }
+  function paperLink(key) {
+    var p = PAPERS[key]; if (!p) return null;
+    var href = p.doi ? "https://doi.org/" + p.doi : p.url;
+    var a = el(href ? "a" : "span", href ? { href: href } : {}, authorsShort(p.authors) + ", " + p.venue + " " + p.year);
+    return a;
+  }
+  function bibtex(key) {
+    var p = PAPERS[key]; if (!p) return "";
+    var f = [["title", "{" + p.title + "}"], ["author", p.authors.join(" and ")]];
+    if (p.type === "article") { f.push(["journal", p.venue]); if (p.volume) f.push(["volume", p.volume]); }
+    else if (p.type === "inproceedings") f.push(["booktitle", p.venue]);
+    else f.push(["howpublished", p.venue]);
+    if (p.pages) f.push(["pages", p.pages]);
+    f.push(["year", String(p.year)]);
+    if (p.doi) f.push(["doi", p.doi]);
+    if (p.url) f.push(["url", p.url]);
+    return "@" + p.type + "{" + key + ",\n" + f.map(function (kv) { return "  " + (kv[0] + "            ").slice(0, 10) + "= {" + kv[1] + "}"; }).join(",\n") + "\n}";
+  }
+  var dlg = document.getElementById("cite-dlg"), citeAll = "";
+  function openCite(entry) {
+    document.getElementById("cite-title").textContent = "Cite " + entry.method;
+    document.getElementById("cite-sub").textContent = [entry.recipe, entry.pretrain, entry.input, entry.appearance].filter(Boolean).join(", ");
+    var list = document.getElementById("cite-list"); list.innerHTML = "";
+    var keys = (entry.cite || []).slice();
+    if (entry.reported_in && keys.indexOf(entry.reported_in) < 0) keys.push(entry.reported_in);
+    if (keys.indexOf("chirla2026") < 0) keys.push("chirla2026");
+    citeAll = keys.map(bibtex).join("\n\n");
+    keys.forEach(function (k) {
+      var p = PAPERS[k]; if (!p) return;
+      var item = el("div", { "class": "cite-item" });
+      var role = k === entry.reported_in ? "Results reported in" : k === "chirla2026" ? "Benchmark" : "Method";
+      item.appendChild(el("div", { "class": "role" }, role));
+      var ref = el("p", { "class": "ref" });
+      ref.appendChild(document.createTextNode(p.title + ". "));
+      ref.appendChild(paperLink(k));
+      item.appendChild(ref);
+      item.appendChild(el("pre", null, bibtex(k)));
+      list.appendChild(item);
+    });
+    dlg.showModal();
+  }
+  document.getElementById("cite-close").addEventListener("click", function () { dlg.close(); });
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+  var copyBtn = document.getElementById("cite-copy");
+  copyBtn.addEventListener("click", function () {
+    navigator.clipboard.writeText(citeAll).then(function () {
+      copyBtn.textContent = "Copied"; setTimeout(function () { copyBtn.textContent = "Copy all BibTeX"; }, 1600);
+    }, function () { copyBtn.textContent = "Select to copy"; });
+  });
+
+  /* ---------- Generic sortable table ---------- */
+  // cols: [{key, label, group, get(row), hib (higher is better), int, hidden(), cls}]
+  function LeaderTable(table, opts) {
+    this.table = table; this.opts = opts; this.sort = opts.defaultSort;
+  }
+  LeaderTable.prototype.render = function (rows) {
+    var self = this, o = this.opts, t = this.table;
+    var cols = o.cols.filter(function (c) { return !c.hidden || !c.hidden(); });
+    var sc = cols.filter(function (c) { return c.key === self.sort.key; })[0] || cols[0];
+    rows = rows.slice().sort(function (a, b) {
+      var va = sc.get(a), vb = sc.get(b);
+      if (va == null) return 1; if (vb == null) return -1;
+      return self.sort.dir === "desc" ? vb - va : va - vb;
+    });
+    // best and second best per column among shown rows
+    var marks = {};
+    cols.forEach(function (c) {
+      var vals = rows.map(c.get).filter(function (v) { return v != null; });
+      var uniq = vals.filter(function (v, i) { return vals.indexOf(v) === i; }).sort(function (a, b) { return c.hib ? b - a : a - b; });
+      marks[c.key] = [uniq[0], uniq[1]];
+    });
+    t.innerHTML = "";
+    var thead = el("thead"), r1 = el("tr"), r2 = el("tr");
+    r1.appendChild(el("th", { "class": "sticky1", rowspan: "2", scope: "col" }, "#"));
+    r1.appendChild(el("th", { "class": "sticky2", rowspan: "2", scope: "col", style: "text-align:left;vertical-align:bottom" }, "Method"));
+    var groups = [];
+    cols.forEach(function (c) { var g = groups[groups.length - 1]; if (g && g.name === c.group) g.n++; else groups.push({ name: c.group, n: 1 }); });
+    groups.forEach(function (g) { r1.appendChild(el("th", { colspan: String(g.n), "class": g.name ? "grp" : "", scope: "colgroup" }, g.name || "")); });
+    r1.appendChild(el("th", { rowspan: "2", scope: "col", style: "vertical-align:bottom" }, "Cite"));
+    var prevGroup = null;
+    cols.forEach(function (c) {
+      var th = el("th", { "class": "num" + (c.group !== prevGroup ? " gstart" : "") + (c.cls ? " " + c.cls : ""), scope: "col" });
+      prevGroup = c.group;
+      var b = el("button", { type: "button", "class": "sortbtn", title: c.title || "" });
+      b.appendChild(document.createTextNode(c.label));
+      if (o.arrows) b.appendChild(el("span", { "class": "dir" }, c.hib ? "↑" : "↓"));
+      b.appendChild(el("span", { "class": "arr", "aria-hidden": "true" }));
+      if (c.key === self.sort.key) b.setAttribute("aria-sort", self.sort.dir === "desc" ? "descending" : "ascending");
+      b.addEventListener("click", function () {
+        var dir = c.hib ? "desc" : "asc";
+        if (self.sort.key === c.key) dir = self.sort.dir === "desc" ? "asc" : "desc";
+        self.sort = { key: c.key, dir: dir };
+        self.render(rows);
+      });
+      th.appendChild(b);
+      r2.appendChild(th);
+    });
+    thead.appendChild(r1); thead.appendChild(r2); t.appendChild(thead);
+    var tbody = el("tbody");
+    if (!rows.length) {
+      var tr0 = el("tr"); tr0.appendChild(el("td", { colspan: String(cols.length + 3), "class": "status" }, "No results match these filters.")); tbody.appendChild(tr0);
+    }
+    rows.forEach(function (r, i) {
+      var tr = el("tr");
+      tr.appendChild(el("td", { "class": "sticky1" }, String(i + 1)));
+      var m = el("td", { "class": "sticky2" });
+      m.appendChild(el("div", { "class": "mname" }, r.method));
+      var tags = el("div", { "class": "tags" });
+      o.tags(r).forEach(function (tg) { tags.appendChild(el("span", { "class": "tag " + (tg[1] || "") }, tg[0])); });
+      m.appendChild(tags);
+      tr.appendChild(m);
+      var pg = null;
+      cols.forEach(function (c) {
+        var v = c.get(r);
+        var td = el("td", { "class": "num" + (c.group !== pg ? " gstart" : "") + (c.cls ? " " + c.cls : "") }, fmt(v, c.int));
+        pg = c.group;
+        if (v != null && v === marks[c.key][0]) td.classList.add("best");
+        else if (v != null && v === marks[c.key][1]) td.classList.add("second");
+        tr.appendChild(td);
+      });
+      var ct = el("td"), cb = el("button", { type: "button", "class": "citebtn", "aria-label": "Cite " + r.method }, "Cite");
+      cb.addEventListener("click", function () { openCite(r); });
+      ct.appendChild(cb); tr.appendChild(ct);
+      tbody.appendChild(tr);
+    });
+    t.appendChild(tbody);
+  };
+
+  function isNew(r) {
+    if (r.kind !== "community" || !r.added || !DATA.updated) return false;
+    return (new Date(DATA.updated) - new Date(r.added)) / 864e5 <= 90;
+  }
+  function commonTags(r) {
+    var t = [];
+    if (isNew(r)) t.push(["new", "new"]);
+    if (r.kind === "community") t.push(["community", "base"]);
+    if (r.verified && r.kind !== "baseline") t.push(["verified", "verified"]);
+    return t;
+  }
+
+  /* ---------- Re-ID ---------- */
+  var SC = [["long_term", "Long-term"], ["multi_camera_long_term", "Multi-camera long-term"], ["multi_camera", "Multi-camera"], ["reappearance", "Reappearance"]];
+  var showRanks = document.getElementById("reid-ranks");
+  // Mean of one metric over the four scenarios (null if any scenario is missing).
+  function meanOf(metric) {
+    return function (r) {
+      var sum = 0;
+      for (var i = 0; i < SC.length; i++) { var x = r.results[SC[i][0]]; if (!x || x[metric] == null) return null; sum += x[metric]; }
+      return Math.round(sum / SC.length * 100) / 100;
+    };
+  }
+  var reidCols = [
+    { key: "mean.r1", label: "R-1", group: "Mean", get: meanOf("r1"), hib: true, cls: "avg", title: "Rank-1 averaged over the four scenarios" },
+    { key: "mean.map", label: "mAP", group: "Mean", get: meanOf("map"), hib: true, cls: "avg", title: "mAP averaged over the four scenarios" }
+  ];
+  SC.forEach(function (s) {
+    [["r1", "R-1"], ["r5", "R-5"], ["r10", "R-10"], ["map", "mAP"]].forEach(function (m) {
+      reidCols.push({
+        key: s[0] + "." + m[0], label: m[1], group: s[1], hib: true,
+        get: function (r) { var x = r.results[s[0]]; return x ? x[m[0]] : null; },
+        hidden: (m[0] === "r5" || m[0] === "r10") ? function () { return !showRanks.checked; } : null
+      });
+    });
+  });
+  var reidTable = new LeaderTable(document.getElementById("reid-table"), {
+    cols: reidCols, defaultSort: { key: "mean.map", dir: "desc" },
+    tags: function (r) {
+      var t = [];
+      if (r.recipe) t.push([r.recipe]);
+      if (r.pretrain) t.push([r.pretrain]);
+      t.push([r.input]);
+      if (r.weights) t.push([r.weights + " weights"]);
+      return commonTags(r).concat(t);
+    }
+  });
+  function reidRows() {
+    var q = document.getElementById("reid-q").value.trim().toLowerCase();
+    var pre = document.getElementById("reid-pre").value, inp = document.getElementById("reid-input").value, kind = document.getElementById("reid-kind").value;
+    return DATA.reid_closed.filter(function (r) {
+      if (pre === "none" ? r.pretrain : pre && r.pretrain !== pre) return false;
+      if (inp && r.input !== inp) return false;
+      if (kind && r.kind !== kind) return false;
+      if (q) {
+        var hay = [r.method, r.recipe, r.pretrain, r.weights, r.input].concat((r.cite || []).map(function (k) { return PAPERS[k] ? PAPERS[k].title + " " + PAPERS[k].authors.join(" ") : ""; })).join(" ").toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+  }
+  function drawReid() {
+    var rows = reidRows();
+    reidTable.render(rows);
+    document.getElementById("reid-shown").textContent = rows.length + " of " + DATA.reid_closed.length + " results";
+  }
+  ["reid-q", "reid-pre", "reid-input", "reid-kind", "reid-ranks"].forEach(function (id) {
+    document.getElementById(id).addEventListener(id === "reid-q" ? "input" : "change", drawReid);
+  });
+
+  /* ---------- Open-set ---------- */
+  function drawOpen() {
+    var box = document.getElementById("open-content"); box.innerHTML = "";
+    if (DATA.reid_open && DATA.reid_open.length) {
+      box.appendChild(el("p", { "class": "status" }, DATA.reid_open.length + " open-set results. Add an open-set table definition to show them here."));
+      return;
+    }
+    var e = el("div", { "class": "empty" });
+    e.innerHTML = '<i class="fa-solid fa-user-secret" aria-hidden="true"></i>';
+    e.appendChild(el("h3", null, "No open-set results yet"));
+    e.appendChild(el("p", null, "CHIRLA’s test sets include distractors: people who never appear in the gallery. In the open-set setting a model must also recognize that someone is unknown, which is closer to real deployments. The paper reports closed-set results only, so this track is open."));
+    var a = el("a", { href: "#submit", "class": "citebtn", style: "display:inline-block;padding:0.45rem 1.05rem;font-size:0.95rem;text-decoration:none" }, "Submit the first open-set result");
+    e.appendChild(a);
+    box.appendChild(e);
+  }
+
+  /* ---------- Tracking ---------- */
+  var detail = document.getElementById("trk-detail");
+  function tget(group, m) { return function (r) { var x = r.results[group]; return x ? x[m] : null; }; }
+  function dHidden() { return !detail.checked; }
+  var trkCols = [
+    { key: "all.mota", label: "MOTA", group: "All test set", get: tget("all", "mota"), hib: true },
+    { key: "all.idf1", label: "IDF1", group: "All test set", get: tget("all", "idf1"), hib: true },
+    { key: "all.mt", label: "MT", group: "All test set", get: tget("all", "mt"), hib: true, int: true, hidden: dHidden },
+    { key: "all.ml", label: "ML", group: "All test set", get: tget("all", "ml"), hib: false, int: true, hidden: dHidden },
+    { key: "all.fn", label: "FN", group: "All test set", get: tget("all", "fn"), hib: false, int: true, hidden: dHidden },
+    { key: "all.fp", label: "FP", group: "All test set", get: tget("all", "fp"), hib: false, int: true, hidden: dHidden },
+    { key: "all.idsw", label: "IDSW", group: "All test set", get: tget("all", "idsw"), hib: false, int: true },
+    { key: "all.fm", label: "FM", group: "All test set", get: tget("all", "fm"), hib: false, int: true, hidden: dHidden },
+    { key: "brief.mota", label: "MOTA", group: "Brief occlusions", get: tget("brief_occlusions", "mota"), hib: true },
+    { key: "brief.idf1", label: "IDF1", group: "Brief occlusions", get: tget("brief_occlusions", "idf1"), hib: true },
+    { key: "brief.idsw", label: "IDSW", group: "Brief occlusions", get: tget("brief_occlusions", "idsw"), hib: false, int: true },
+    { key: "multi.mota", label: "MOTA", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "mota"), hib: true },
+    { key: "multi.idf1", label: "IDF1", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "idf1"), hib: true },
+    { key: "multi.idsw", label: "IDSW", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "idsw"), hib: false, int: true }
+  ];
+  var trkTable = new LeaderTable(document.getElementById("trk-table"), {
+    cols: trkCols, defaultSort: { key: "all.mota", dir: "desc" }, arrows: true,
+    tags: function (r) {
+      var t = [[r.appearance ? "appearance: " + r.appearance : "motion only"]];
+      if (r.detector) t.push(["detector: " + r.detector]);
+      return commonTags(r).concat(t);
+    }
+  });
+  function drawTrk() {
+    var q = document.getElementById("trk-q").value.trim().toLowerCase(), kind = document.getElementById("trk-kind").value;
+    var rows = DATA.tracking.filter(function (r) {
+      if (kind && r.kind !== kind) return false;
+      if (q && [r.method, r.appearance, r.detector].join(" ").toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    trkTable.render(rows);
+    document.getElementById("trk-shown").textContent = rows.length + " of " + DATA.tracking.length + " results";
+  }
+  ["trk-q", "trk-kind", "trk-detail"].forEach(function (id) {
+    document.getElementById(id).addEventListener(id === "trk-q" ? "input" : "change", drawTrk);
+  });
+
+  /* ---------- Tabs ---------- */
+  var tabs = document.querySelectorAll(".tab");
+  function selectTab(t) {
+    tabs.forEach(function (x) {
+      var on = x === t;
+      x.setAttribute("aria-selected", on ? "true" : "false");
+      x.tabIndex = on ? 0 : -1;
+      document.getElementById(x.getAttribute("aria-controls")).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { selectTab(t); });
+    t.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") { var nx = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length]; selectTab(nx); nx.focus(); }
+    });
+  });
+
+  /* ---------- Load ---------- */
+  fetch("leaderboard/results.json", { cache: "no-cache" }).then(function (r) {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(function (d) {
+    DATA = d; PAPERS = d.papers || {};
+    DATA.reid_open = DATA.reid_open || [];
+    var n = DATA.reid_closed.length + DATA.reid_open.length + DATA.tracking.length;
+    var community = DATA.reid_closed.concat(DATA.reid_open, DATA.tracking).filter(function (r) { return r.kind === "community"; }).length;
+    // Only mention community results once there are some; "0 from the community" reads as a negative.
+    document.getElementById("meta").textContent = n + " results" + (community ? " (" + community + " from the community)" : "") + ". Last updated " + fmtDate(DATA.updated) + ".";
+    document.getElementById("count-closed").textContent = DATA.reid_closed.length;
+    document.getElementById("count-open").textContent = DATA.reid_open.length;
+    drawReid(); drawOpen(); drawTrk();
+  }).catch(function () {
+    var msg = "Couldn’t load leaderboard/results.json. If you opened this file from your computer, run “python -m http.server” in the docs folder and open http://localhost:8000/leaderboard.html.";
+    document.getElementById("meta").textContent = msg;
+    ["reid-table", "trk-table"].forEach(function (id) { document.getElementById(id).innerHTML = '<tbody><tr><td class="status"></td></tr></tbody>'; document.querySelector("#" + id + " .status").textContent = msg; });
+  });
+})();
+</script>
+</body>
+</html>
