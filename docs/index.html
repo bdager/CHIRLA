@@ -86,13 +86,26 @@ p { margin: 0 0 1rem; }
 .nav .container { display: flex; align-items: center; gap: 1.25rem; height: 56px; }
 .nav .brand { font-family: "Fredoka", "Google Sans", sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 0.4rem; }
 .nav .brand i { color: var(--accent); font-size: 1rem; }
-.nav ul { display: flex; gap: 0.25rem; list-style: none; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; flex: 1; }
-.nav ul::-webkit-scrollbar { display: none; }
-.nav li a { display: block; padding: 0.35rem 0.7rem; border-radius: 999px; color: var(--muted); white-space: nowrap; font-size: 0.93rem; text-decoration: none; }
-.nav li a:hover { color: var(--text); background: var(--soft); }
-.nav li a.current { color: var(--text); background: var(--soft); }
+.nav .navlinks { display: flex; gap: 0.25rem; list-style: none; margin: 0; padding: 0; flex: 1; }
+.nav .navlinks > li > a, .navgroup summary { display: flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.7rem; border-radius: 999px; color: var(--muted); white-space: nowrap; font-size: 0.93rem; text-decoration: none; cursor: pointer; }
+.nav .navlinks > li > a:hover, .navgroup summary:hover { color: var(--text); background: var(--soft); }
+.nav .navlinks > li > a.current, .navgroup summary.current, .navgroup[open] summary { color: var(--text); background: var(--soft); }
+.navgroup { position: relative; }
+.navgroup summary { list-style: none; user-select: none; }
+.navgroup summary::-webkit-details-marker { display: none; }
+.navgroup summary i { font-size: 0.6rem; transition: transform 150ms; }
+.navgroup[open] summary i { transform: rotate(180deg); }
+.navmenu { position: absolute; z-index: 20; top: calc(100% + 0.45rem); left: 0; min-width: 13rem; list-style: none; margin: 0; padding: 0.35rem; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
+.navmenu a { display: block; padding: 0.45rem 0.7rem; border-radius: 6px; color: var(--text); font-size: 0.93rem; white-space: nowrap; text-decoration: none; }
+.navmenu a:hover { background: var(--soft); text-decoration: none; }
+.navmenu a.current { color: var(--accent); font-weight: 600; }
+@media (max-width: 480px) { .nav .container { gap: 0.5rem; } .nav .brand { font-size: 1.05rem; } .nav .brand i { display: none; } .nav .navlinks { gap: 0; } .nav .navlinks > li > a, .navgroup summary { padding: 0.35rem 0.45rem; font-size: 0.86rem; } .navgroup summary i { display: none; } }
+@media (prefers-reduced-motion: reduce) { .navgroup summary i { transition: none; } }
+.nav .lbbtn { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; border: 1.5px solid var(--line); color: var(--text); border-radius: 999px; padding: 0.3rem 0.85rem; font-size: 0.9rem; text-decoration: none; margin-right: -0.6rem; }
+.nav .lbbtn i { color: var(--accent); font-size: 0.85rem; }
+.nav .lbbtn:hover { border-color: var(--accent); text-decoration: none; }
 .nav .paper { white-space: nowrap; background: var(--btn); color: var(--btn-text); border-radius: 999px; padding: 0.35rem 0.9rem; font-size: 0.9rem; text-decoration: none; }
-@media (max-width: 640px) { .nav .paper { display: none; } }
+@media (max-width: 640px) { .nav .paper, .nav .lbbtn { display: none; } }
 
 /* ---------- Hero ---------- */
 .hero { text-align: center; padding: 3rem 0 0.5rem; }
@@ -297,16 +310,23 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
 <nav class="nav" aria-label="Sections">
   <div class="container">
     <a class="brand" href="#top"><i class="fa-regular fa-square"></i>CHIRLA</a>
-    <ul>
-      <li><a href="#abstract">Abstract</a></li>
-      <li><a href="#explore">Explore</a></li>
-      <li><a href="#environment">Environment</a></li>
+    <ul class="navlinks">
+      <li>
+        <details class="navgroup">
+          <summary>Dataset<i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary>
+          <ul class="navmenu">
+            <li><a href="#abstract">Overview</a></li>
+            <li><a href="#explore">Explore the data</a></li>
+            <li><a href="#environment">Recording environment</a></li>
+            <li><a href="#team">Team</a></li>
+          </ul>
+        </details>
+      </li>
       <li><a href="#benchmark">Benchmark</a></li>
-      <li><a href="leaderboard.html">Leaderboard</a></li>
       <li><a href="#download">Download</a></li>
-      <li><a href="#team">Team</a></li>
-      <li><a href="#citation">Citation</a></li>
+      <li><a href="#citation">Cite</a></li>
     </ul>
+    <a class="lbbtn" href="leaderboard.html"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i>Leaderboard</a>
     <a class="paper" href="https://www.nature.com/articles/s41597-025-06425-3">Paper</a>
   </div>
 </nav>
@@ -328,7 +348,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     <li><a href="https://arxiv.org/abs/2502.06681"><i class="fa-solid fa-scroll"></i>arXiv</a></li>
     <li><a href="https://github.com/bdager/CHIRLA"><i class="fa-brands fa-github"></i>Code</a></li>
     <li><a href="https://huggingface.co/datasets/bdager/CHIRLA"><span aria-hidden="true">🤗</span>Dataset</a></li>
-    <li><a href="https://www.scidb.cn/en/detail?dataSetId=2247f442a9784b5c959e7bead89c0313"><i class="fa-solid fa-database"></i>Science Data Bank</a></li>
+    <li><a href="leaderboard.html"><i class="fa-solid fa-ranking-star"></i>Leaderboard</a></li>
     <li><a href="https://github.com/bdager/preid-labeling-gui"><i class="fa-solid fa-pen-ruler"></i>Labeling Tool</a></li>
   </ul>
 
@@ -551,10 +571,10 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
 (function () {
   /* ---------- Author profile links: replace with each person's Google Scholar profile ---------- */
   var PROFILES = {
-    bessie: "https://scholar.google.es/citations?user=JBNPxeoAAAAJ&hl=es",    
-    felix: "https://scholar.google.es/citations?user=_r20fQEAAAAJ&hl=es",
-    francisco: "https://scholar.google.es/citations?user=NxJLrBAAAAAJ&hl=es",
-    miguel: "https://scholar.google.es/citations?user=1rgeSeEAAAAJ&hl=es"
+    bessie: "",     // e.g. "https://scholar.google.com/citations?user=XXXXXXXXXXXX"
+    felix: "",
+    francisco: "",
+    miguel: ""
   };
   document.querySelectorAll("a[data-person]").forEach(function (a) {
     var url = PROFILES[a.getAttribute("data-person")];
@@ -959,14 +979,26 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     });
   });
 
+  /* ---------- Nav menus ---------- */
+  var groups = document.querySelectorAll(".navgroup");
+  groups.forEach(function (g) {
+    g.addEventListener("toggle", function () { if (g.open) groups.forEach(function (o) { if (o !== g) o.open = false; }); });
+    g.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", function () { g.open = false; }); });
+  });
+  document.addEventListener("click", function (e) { groups.forEach(function (g) { if (g.open && !g.contains(e.target)) g.open = false; }); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    groups.forEach(function (g) { if (g.open) { g.open = false; g.querySelector("summary").focus(); } });
+  });
+
   /* ---------- Highlight current section in nav ---------- */
-  var links = document.querySelectorAll(".nav li a");
+  var links = document.querySelectorAll('.nav a[href^="#"]');
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
-        if (en.isIntersecting) {
-          links.forEach(function (a) { a.classList.toggle("current", a.getAttribute("href") === "#" + en.target.id); });
-        }
+        if (!en.isIntersecting) return;
+        links.forEach(function (a) { a.classList.toggle("current", a.getAttribute("href") === "#" + en.target.id); });
+        groups.forEach(function (g) { g.querySelector("summary").classList.toggle("current", !!g.querySelector("a.current")); });
       });
     }, { rootMargin: "-45% 0px -50% 0px" });
     document.querySelectorAll("main section[id]").forEach(function (s) { io.observe(s); });
