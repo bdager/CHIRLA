@@ -1,5 +1,6 @@
 name: Validate leaderboard results
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "docs/leaderboard/results.json"
