@@ -4,7 +4,6 @@ import csv
 import argparse
 import h5py
 import numpy as np
-from sklearn.metrics import average_precision_score
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -193,6 +192,20 @@ def evaluate_cmc_map_with_unknowns(query_emb, query_ids, gallery_emb, gallery_id
         return cmc_open, mAP_open, results
 
 
+def ranked_average_precision(matches):
+    """
+    AP of a ranked list (1 = correct identity): the mean precision at the rank of each
+    correct match, as in the Market-1501 evaluation. Images with tied scores keep the
+    order of the ranking instead of being averaged as a group (sklearn's definition).
+    """
+    num_matches = matches.sum()
+    if num_matches == 0:
+        return 0.0
+    hits = np.cumsum(matches)
+    precision = hits / np.arange(1, len(matches) + 1)
+    return float(precision[matches == 1].sum() / num_matches)
+
+
 def evaluate_cmc_map(query_emb, query_ids, gallery_emb, gallery_ids, topk=[1,5,10], min_sim_threshold=None, sim_matrix=None):
     if sim_matrix is None:
         sim_matrix = cosine_similarity(query_emb, gallery_emb)
@@ -216,22 +229,8 @@ def evaluate_cmc_map(query_emb, query_ids, gallery_emb, gallery_ids, topk=[1,5,1
 
         # Compute AP (average precision) with optional similarity threshold
         if min_sim_threshold is not None:
-            mask = scores_sorted >= min_sim_threshold
-            if mask.any():
-                matches_masked = matches[mask]
-                scores_masked = scores_sorted[mask]
-                if matches_masked.sum() > 0:
-                    ap = average_precision_score(matches_masked, scores_masked)
-                else:
-                    ap = 0.0
-            else:
-                ap = 0.0
-        else:
-            if matches.sum() > 0:
-                ap = average_precision_score(matches, scores_sorted)
-            else:
-                ap = 0.0
-        ap_list.append(ap)
+            matches = matches[scores_sorted >= min_sim_threshold]
+        ap_list.append(ranked_average_precision(matches))
 
     cmc_scores /= num_queries
     mAP = np.mean(ap_list)
