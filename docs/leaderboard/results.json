@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-28",
+ "updated": "2026-11-03",
  "papers": {
   "chirla2026": {
    "type": "article",
@@ -342,6 +342,39 @@
    "venue": "GitHub",
    "year": 2024,
    "url": "https://github.com/ultralytics/ultralytics"
+  },
+  "liang2025differ": {
+   "type": "inproceedings",
+   "authors": [
+    "Liang, X.",
+    "Rawat, Y. S."
+   ],
+   "title": "DIFFER: Disentangling identity features via semantic cues for clothes-changing person re-ID",
+   "venue": "CVPR",
+   "year": 2025,
+   "pages": "13980--13989"
+  },
+  "kim2025sapiensid": {
+   "type": "inproceedings",
+   "authors": [
+    "Kim, M.",
+    "others"
+   ],
+   "title": "SapiensID: Foundation for human recognition",
+   "venue": "CVPR",
+   "year": 2025
+  },
+  "dominguezdager2026judgereid": {
+   "type": "misc",
+   "authors": [
+    "Dominguez-Dager, Bessie",
+    "Cazorla, Miguel",
+    "Lepetit, Vincent"
+   ],
+   "title": "VLM-as-a-Judge for Person Re-Identification",
+   "venue": "arXiv",
+   "year": 2026,
+   "url": "https://arxiv.org/abs/2611.03027"
   }
  },
  "reid_closed": [
@@ -2390,6 +2423,88 @@
      "r5": 81.97,
      "r10": 92.54,
      "map": 54.11
+    }
+   }
+  },
+  {
+   "id": "differ-celeb-light",
+   "method": "DIFFER",
+   "recipe": null,
+   "pretrain": "Celeb-reID-light",
+   "input": "224×224",
+   "weights": "DIFFER",
+   "cite": [
+    "liang2025differ"
+   ],
+   "reported_in": "dominguezdager2026judgereid",
+   "kind": "baseline",
+   "verified": true,
+   "added": "2026-11-03",
+   "results": {
+    "long_term": {
+     "r1": 30.89,
+     "r5": 62.62,
+     "r10": 79.33,
+     "map": 31.2
+    },
+    "multi_camera_long_term": {
+     "r1": 42.56,
+     "r5": 74.68,
+     "r10": 85.65,
+     "map": 48.51
+    },
+    "multi_camera": {
+     "r1": 52.67,
+     "r5": 74.44,
+     "r10": 82.74,
+     "map": 53.79
+    },
+    "reappearance": {
+     "r1": 54.15,
+     "r5": 81.31,
+     "r10": 92.62,
+     "map": 55.45
+    }
+   }
+  },
+  {
+   "id": "sapiensid-wb12m",
+   "method": "SapiensID",
+   "recipe": null,
+   "pretrain": "WebBody12M",
+   "input": "384×384",
+   "weights": "SapiensID",
+   "cite": [
+    "kim2025sapiensid"
+   ],
+   "reported_in": "dominguezdager2026judgereid",
+   "kind": "baseline",
+   "verified": true,
+   "added": "2026-11-03",
+   "results": {
+    "long_term": {
+     "r1": 35.5,
+     "r5": 58.6,
+     "r10": 71.88,
+     "map": 35.01
+    },
+    "multi_camera_long_term": {
+     "r1": 43.44,
+     "r5": 70.12,
+     "r10": 85.46,
+     "map": 46.63
+    },
+    "multi_camera": {
+     "r1": 61.28,
+     "r5": 80.15,
+     "r10": 88.69,
+     "map": 57.94
+    },
+    "reappearance": {
+     "r1": 65.5,
+     "r5": 82.0,
+     "r10": 91.6,
+     "map": 61.22
     }
    }
   }

@@ -199,10 +199,10 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
       <div class="controls">
         <label>Search <input type="search" id="reid-q" placeholder="Method, recipe, paper…"></label>
         <label>Pretraining
-          <select id="reid-pre"><option value="">All</option><option>Market-1501</option><option>DukeMTMC</option><option>MSMT17</option><option value="none">Not specified</option></select>
+          <select id="reid-pre"><option value="">All</option><option>Market-1501</option><option>DukeMTMC</option><option>MSMT17</option><option>Celeb-reID-light</option><option>WebBody12M</option><option value="none">Not specified</option></select>
         </label>
         <label>Input
-          <select id="reid-input"><option value="">All</option><option>256×128</option><option>384×128</option></select>
+          <select id="reid-input"><option value="">All</option><option>256×128</option><option>384×128</option><option>224×224</option><option>384×384</option></select>
         </label>
         <label>Source
           <select id="reid-kind"><option value="">All</option><option value="baseline">Paper baselines</option><option value="community">Community</option></select>
@@ -212,7 +212,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
         <span class="shown" id="reid-shown" aria-live="polite"></span>
       </div>
       <div class="table-wrap"><table class="lb" id="reid-table"></table></div>
-      <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among the rows shown. Tags list the training recipe, pretraining data, input size and source of the weights; rows without a <span class="tag base">community</span> tag are baselines from the paper. <b>Mean</b> columns average Rank-1 and mAP over the four scenarios; the table is ranked by mean mAP by default.</p>
+      <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among the rows shown. Tags list the training recipe, pretraining data, input size and source of the weights; rows without a <span class="tag base">community</span> tag are baselines run by the CHIRLA team. <b>Mean</b> columns average Rank-1 and mAP over the four scenarios; the table is ranked by mean mAP by default.</p>
     </div>
 
     <div class="panel" id="panel-open" role="tabpanel" aria-labelledby="tab-open" hidden>
@@ -514,7 +514,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
       var t = [];
       if (r.recipe) t.push([r.recipe]);
       if (r.pretrain) t.push([r.pretrain]);
-      t.push([r.input]);
+      if (r.input) t.push([r.input]);
       if (r.weights) t.push([r.weights + " weights"]);
       return commonTags(r).concat(t);
     }
