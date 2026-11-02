@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import csv
 import argparse
 import h5py
 import numpy as np
@@ -85,14 +86,47 @@ def group_by_subset(embeddings, ids, paths):
     return subset_data
 
 
+def write_results_csv(csv_path, query_paths, query_ids, gallery_paths, gallery_ids, sim_matrix, save_topk=None):
+    """
+    Write the ranked gallery for every query, one row per (query, rank):
+    query_path, query_id, gallery_path, gallery_id, rank, score.
+    save_topk=None keeps the full ranking.
+    """
+    os.makedirs(os.path.dirname(os.path.abspath(csv_path)), exist_ok=True)
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["query_path", "query_id", "gallery_path", "gallery_id", "rank", "score"])
+        for i in range(len(query_paths)):
+            sim_scores = sim_matrix[i]
+            sort_idx = np.argsort(-sim_scores)[:save_topk]
+            for rank, j in enumerate(sort_idx, start=1):
+                writer.writerow([query_paths[i], int(query_ids[i]), gallery_paths[j],
+                                 int(gallery_ids[j]), rank, float(sim_scores[j])])
+    logger.info(f"Results CSV saved → {csv_path}")
+
+
+def concat_csvs(csv_paths, out_path):
+    """Concatenate CSVs that share the same header into out_path."""
+    with open(out_path, "w", newline="") as out:
+        for n, p in enumerate(csv_paths):
+            with open(p, newline="") as f:
+                header = f.readline()
+                if n == 0:
+                    out.write(header)
+                out.writelines(f)
+    logger.info(f"Results CSV saved → {out_path}")
+
+
 # -----------------------
 # 3. CMC and mAP computation
 # -----------------------
-def evaluate_cmc_map_with_unknowns(query_emb, query_ids, gallery_emb, gallery_ids, topk=[1,5,10], open_set_map_threshold=None):
+def evaluate_cmc_map_with_unknowns(query_emb, query_ids, gallery_emb, gallery_ids, topk=[1,5,10], open_set_map_threshold=None,
+                                   query_paths=None, gallery_paths=None, csv_path=None, save_topk=None):
     """
     Enhanced ReID evaluation that handles unknown identities properly.
     Returns both closed-set (known only) and open-set (with unknowns) results.
     Optionally applies a similarity threshold when computing mAP for the open-set.
+    If csv_path is given, also writes the ranked gallery per query (see write_results_csv).
     """
     # Identify known vs unknown identities
     known_mask = query_ids >= 0  # Assuming negative IDs are unknown
@@ -118,14 +152,20 @@ def evaluate_cmc_map_with_unknowns(query_emb, query_ids, gallery_emb, gallery_id
         'positive_pairs': 0,  # Will be calculated if needed
         'negative_pairs': 0   # Will be calculated if needed
     }
-    
+
+    # Computed once and shared by the CSV and both evaluations below
+    sim_matrix = cosine_similarity(query_emb, gallery_emb)
+    if csv_path is not None and query_paths is not None and gallery_paths is not None:
+        write_results_csv(csv_path, query_paths, query_ids, gallery_paths, gallery_ids, sim_matrix, save_topk)
+
     # 1. Closed-set evaluation (only known identities)
     if truly_known_mask.sum() > 0:
         closed_query_emb = query_emb[truly_known_mask]
         closed_query_ids = query_ids[truly_known_mask]
-        
+
         cmc_closed, mAP_closed = evaluate_cmc_map(
-            closed_query_emb, closed_query_ids, gallery_emb, gallery_ids, topk
+            closed_query_emb, closed_query_ids, gallery_emb, gallery_ids, topk,
+            sim_matrix=sim_matrix[truly_known_mask]
         )
         results['closed_set'] = {'cmc': cmc_closed, 'mAP': mAP_closed, 'num_queries': len(closed_query_ids)}
         
@@ -135,7 +175,8 @@ def evaluate_cmc_map_with_unknowns(query_emb, query_ids, gallery_emb, gallery_id
         logger.info(f"  mAP: {mAP_closed*100:.2f}%")
     
     # 2. Open-set evaluation (all identities including unknowns)
-    cmc_open, mAP_open = evaluate_cmc_map(query_emb, query_ids, gallery_emb, gallery_ids, topk, min_sim_threshold=open_set_map_threshold)
+    cmc_open, mAP_open = evaluate_cmc_map(query_emb, query_ids, gallery_emb, gallery_ids, topk, min_sim_threshold=open_set_map_threshold,
+                                          sim_matrix=sim_matrix)
     results['open_set'] = {'cmc': cmc_open, 'mAP': mAP_open, 'num_queries': len(query_ids), 'map_threshold': open_set_map_threshold}
     
     logger.info(f"\n--- Open-set Results (All IDs including unknowns: {len(query_ids)} queries) ---")
@@ -152,9 +193,10 @@ def evaluate_cmc_map_with_unknowns(query_emb, query_ids, gallery_emb, gallery_id
         return cmc_open, mAP_open, results
 
 
-def evaluate_cmc_map(query_emb, query_ids, gallery_emb, gallery_ids, topk=[1,5,10], min_sim_threshold=None):
-    sim_matrix = cosine_similarity(query_emb, gallery_emb)
-    
+def evaluate_cmc_map(query_emb, query_ids, gallery_emb, gallery_ids, topk=[1,5,10], min_sim_threshold=None, sim_matrix=None):
+    if sim_matrix is None:
+        sim_matrix = cosine_similarity(query_emb, gallery_emb)
+
     num_queries = query_emb.shape[0]
     cmc_scores = np.zeros(len(topk))
     ap_list = []
@@ -197,13 +239,15 @@ def evaluate_cmc_map(query_emb, query_ids, gallery_emb, gallery_ids, topk=[1,5,1
     return cmc_scores, mAP
 
 
-def evaluate_per_subset(query_emb, query_ids, query_paths, gallery_emb, gallery_ids, gallery_paths, topk=[1,5,10], open_set_map_threshold=None):
+def evaluate_per_subset(query_emb, query_ids, query_paths, gallery_emb, gallery_ids, gallery_paths, topk=[1,5,10], open_set_map_threshold=None,
+                        csv_path=None, save_topk=None):
     """
     Evaluate metrics per subset and return both per-subset and averaged results.
+    If csv_path is given (e.g. results.csv), writes results_test_1.csv,
+    results_test_2.csv, ... with each subset's rankings, plus results.csv with all of them.
     """
     logger.info("\n=== Per-Subset Evaluation ===")
-
-    print(query_paths)
+    subset_csvs = []
     
     # Group query data by subset
     query_subsets = group_by_subset(query_emb, query_ids, query_paths)
@@ -221,26 +265,36 @@ def evaluate_per_subset(query_emb, query_ids, query_paths, gallery_emb, gallery_
         query_subset_data = query_subsets[query_subset]
         q_emb = query_subset_data['embeddings']
         q_ids = query_subset_data['ids']
-        
+        q_paths = query_subset_data['paths']
+
         logger.info(f"Query subset {query_subset}: {q_emb.shape[0]} samples, {len(np.unique(q_ids))} unique IDs")
-        
+
         # Find corresponding gallery subset (e.g., test_1 -> train_1)
         corresponding_gallery_subset = query_subset.replace('test_', 'train_')
-        
+
         if corresponding_gallery_subset in gallery_subsets:
             gallery_subset_data = gallery_subsets[corresponding_gallery_subset]
             g_emb = gallery_subset_data['embeddings']
             g_ids = gallery_subset_data['ids']
-            
+            g_paths = gallery_subset_data['paths']
+
             logger.info(f"Using corresponding gallery subset {corresponding_gallery_subset}: {g_emb.shape[0]} samples, {len(np.unique(g_ids))} unique IDs")
-            
-            # Use enhanced evaluation that handles unknown identities
-            cmc_scores, mAP, detailed_results = evaluate_cmc_map_with_unknowns(q_emb, q_ids, g_emb, g_ids, topk=topk, open_set_map_threshold=open_set_map_threshold)
         else:
             logger.warning(f"No corresponding gallery subset found for {query_subset} (looking for {corresponding_gallery_subset})")
             logger.info("Falling back to using entire gallery")
-            cmc_scores, mAP, detailed_results = evaluate_cmc_map_with_unknowns(q_emb, q_ids, gallery_emb, gallery_ids, topk=topk, open_set_map_threshold=open_set_map_threshold)
-        
+            g_emb, g_ids, g_paths = gallery_emb, gallery_ids, gallery_paths
+
+        subset_csv = None
+        if csv_path is not None:
+            stem, ext = os.path.splitext(csv_path)
+            subset_csv = f"{stem}_{query_subset}{ext}"
+            subset_csvs.append(subset_csv)
+
+        # Use enhanced evaluation that handles unknown identities
+        cmc_scores, mAP, detailed_results = evaluate_cmc_map_with_unknowns(
+            q_emb, q_ids, g_emb, g_ids, topk=topk, open_set_map_threshold=open_set_map_threshold,
+            query_paths=q_paths, gallery_paths=g_paths, csv_path=subset_csv, save_topk=save_topk)
+
         logger.info(f"Results for {query_subset}:")
         for k, score in zip(topk, cmc_scores):
             logger.info(f"  CMC Rank-{k}: {score*100:.2f}%")
@@ -254,7 +308,10 @@ def evaluate_per_subset(query_emb, query_ids, query_paths, gallery_emb, gallery_
                 'subset': query_subset,
                 'num_queries': q_emb.shape[0]
             })
-    
+
+    if subset_csvs:
+        concat_csvs(subset_csvs, csv_path)
+
     # Calculate weighted average across subsets
     if valid_results:        
         logger.info(f"\n--- Summary of {len(valid_results)} valid subsets ---")
@@ -279,20 +336,21 @@ def evaluate_per_subset(query_emb, query_ids, query_paths, gallery_emb, gallery_
 # -----------------------
 # 4. Visualization of top-k matches
 # -----------------------
-def visualize_topk(query_path, gallery_paths, gallery_ids, query_id, matches, topk=5):
+def visualize_topk(query_path, gallery_paths, gallery_ids, query_id, matches, topk=5, data_root=""):
     """
     Display the query image and top-k gallery matches.
     Matches = binary array indicating correct IDs.
+    data_root is prepended to relative image paths (an absolute path is used as is).
     """
     fig, axes = plt.subplots(1, topk+1, figsize=(15, 5))
     # Show query
-    axes[0].imshow(Image.open(query_path))
+    axes[0].imshow(Image.open(os.path.join(data_root, query_path)))
     axes[0].set_title(f"Query ID: {query_id}", color="blue")
     axes[0].axis("off")
 
     # Show top-k matches
     for k in range(topk):
-        axes[k+1].imshow(Image.open(gallery_paths[k]))
+        axes[k+1].imshow(Image.open(os.path.join(data_root, gallery_paths[k])))
         axes[k+1].set_title(f"ID: {gallery_ids[k]}\n{'✔' if matches[k] else '✘'}",
                             color="green" if matches[k] else "red")
         axes[k+1].axis("off")
@@ -311,8 +369,9 @@ def load_h5_embeddings(h5_path):
     return embeddings, ids, paths
 
 
-def run_evaluation(gallery_h5, query_h5, topk=[1, 5, 10], per_subset=True, 
-                   open_map_threshold=None, visualize=False, show_logs=True):
+def run_evaluation(gallery_h5, query_h5, topk=[1, 5, 10], per_subset=True,
+                   open_map_threshold=None, visualize=False, show_logs=True,
+                   csv_path=None, save_topk=None, data_root=""):
     # Adjust logger level based on show_logs flag
     prev_level = logger.level
     if show_logs:
@@ -336,7 +395,8 @@ def run_evaluation(gallery_h5, query_h5, topk=[1, 5, 10], per_subset=True,
             # Per-subset evaluation with averaging
             simple_avg_cmc, simple_avg_mAP = evaluate_per_subset(
                 query_emb, query_ids, query_paths, gallery_emb, gallery_ids,
-                gallery_paths, topk=topk, open_set_map_threshold=open_map_threshold
+                gallery_paths, topk=topk, open_set_map_threshold=open_map_threshold,
+                csv_path=csv_path, save_topk=save_topk
             )
             logger.info("\n" + "="*60)
             logger.info("FINAL AVERAGED RESULTS")
@@ -349,8 +409,10 @@ def run_evaluation(gallery_h5, query_h5, topk=[1, 5, 10], per_subset=True,
         else:
             # Standard evaluation with unknown identity handling
             cmc_scores, mAP, detailed_results = evaluate_cmc_map_with_unknowns(
-                query_emb, query_ids, gallery_emb, gallery_ids, topk=topk, 
-                open_set_map_threshold=open_map_threshold
+                query_emb, query_ids, gallery_emb, gallery_ids, topk=topk,
+                open_set_map_threshold=open_map_threshold,
+                query_paths=query_paths, gallery_paths=gallery_paths,
+                csv_path=csv_path, save_topk=save_topk
             )
             logger.info("\n=== Evaluation Results ===")
             for k, score in zip(topk, cmc_scores):
@@ -371,7 +433,8 @@ def run_evaluation(gallery_h5, query_h5, topk=[1, 5, 10], per_subset=True,
                 top_gallery_paths = gallery_paths[sort_idx][:topk[0]]
                 top_gallery_ids = gallery_ids[sort_idx][:topk[0]]
                 matches = (top_gallery_ids == query_ids[i])
-                visualize_topk(query_paths[i], top_gallery_paths, top_gallery_ids, query_ids[i], matches, topk=topk[0])
+                visualize_topk(query_paths[i], top_gallery_paths, top_gallery_ids, query_ids[i], matches, topk=topk[0],
+                               data_root=data_root)
     finally:
         # Restore previous logger level
         logger.setLevel(prev_level)
@@ -392,16 +455,26 @@ if __name__ == "__main__":
     parser.add_argument("--open-map-threshold", dest="open_map_threshold", 
         type=float, default=None, help="Similarity threshold applied when computing mAP for open-set evaluation (no effect on CMC or closed-set mAP)")
     parser.add_argument("--no-show-logs", action="store_false", help="Show detailed logs during evaluation")
+    parser.add_argument("--out-csv", default=None,
+        help="Save the ranked gallery of every query to this CSV (query_path, query_id, gallery_path, "
+             "gallery_id, rank, score). With --per-subset, <name>_test_N.csv files are written as well.")
+    parser.add_argument("--save-topk", type=int, default=None,
+        help="Ranks to keep per query in --out-csv (default: the full ranking)")
+    parser.add_argument("--data-root", default="",
+        help="CHIRLA benchmark root, used by --visualize to open the relative image paths stored in the HDF5")
 
     args = parser.parse_args()
 
     # Decide logging based on flag (flag name implies disabling when provided)
     show_logs = args.no_show_logs  # True if user did NOT pass --no-show-logs
 
-    run_evaluation(args.gallery, args.query, topk=args.topk, 
+    run_evaluation(args.gallery, args.query, topk=args.topk,
                    per_subset=args.per_subset,
                    open_map_threshold=args.open_map_threshold,
                    visualize=args.visualize,
-                   show_logs=show_logs)
+                   show_logs=show_logs,
+                   csv_path=args.out_csv,
+                   save_topk=args.save_topk,
+                   data_root=args.data_root)
 
 

@@ -81,6 +81,14 @@ python create_embeddings.py \
   --cktp checkpoints/market_bot_R101-ibn.pth
 ```
 
+**DIFFER / SapiensID** (`--model differ` / `--model sapiensid`): clone [DIFFER](https://github.com/xliangp/DIFFER) (commit `67acb5d`) and [SapiensID](https://github.com/mk-minchul/sapiensid) (commit `a8d8011`) into `models/DIFFER` and `models/sapiensid` (or pass `--repo-dir`), and get their weights from each repo. SapiensID also needs `~/.cache/yolov8n-pose.pt`.
+
+> [⚠️IMPORTANT]
+> SapiensID crashes on crops where no person is detected. Apply this one-line fix after cloning:
+> ```
+> sed -i 's/len(_keypoints\[0\]) > 0/len(_keypoints) > 0/' models/sapiensid/tasks/sapiensID/src/aligners/keypoint_predictor/__init__.py
+> ```
+
 
 ## Run Evaluation
 
@@ -92,6 +100,8 @@ Report averaged metrics over all `train_k` / `test_k` subset pairs of specific g
 ```bash
 python evaluate_reid.py     --gallery embeddings/gallery_embeddings.h5     --query embeddings/query_embeddings.h5     --topk 1 5 10     --per-subset
 ```
+
+Add `--out-csv results.csv` to also save each query's ranked gallery (`results_test_k.csv` per subset plus `results.csv` with all of them; `--save-topk N` keeps only the top N). `--visualize` needs `--data-root <CHIRLA>/benchmark`, since the HDF5 paths are relative.
 
 #### Single Subset Evaluation
 To test a specific subset pair (`train_k` vs `test_k`):
