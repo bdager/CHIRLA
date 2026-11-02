@@ -8,7 +8,7 @@
 <a href='https://doi.org/10.57760/sciencedb.20543'><img src='https://img.shields.io/badge/ScienceDB-Dataset-blue?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0zIDVjMC0xLjY2IDQuMDMtMyA5LTNzOSAxLjM0IDkgM3YxNGMwIDEuNjYtNC4wMyAzLTkgM3MtOS0xLjM0LTktM3oiLz48ZyBmaWxsPSJub25lIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMS42Ij48cGF0aCBkPSJNMyA1YzAgMS42NiA0LjAzIDMgOSAzczktMS4zNCA5LTMiLz48cGF0aCBkPSJNMyAxMC43YzAgMS42NiA0LjAzIDMgOSAzczktMS4zNCA5LTMiLz48cGF0aCBkPSJNMyAxNi4yYzAgMS42NiA0LjAzIDMgOSAzczktMS4zNCA5LTMiLz48L2c%2BPC9zdmc%2B'></a>
 [![arXiv](https://img.shields.io/badge/%F0%9F%93%84%20ArXiv-2502.06681-b31b1b.svg)](https://arxiv.org/abs/2502.06681)
 [![Project Page](https://img.shields.io/badge/%F0%9F%8C%90%20Project-Page-green)](https://bdager.github.io/CHIRLA/)
-[![Leaderboard](https://img.shields.io/badge/%F0%9F%8F%86%20Leaderboard-Re--ID%20%26%20Tracking-orange)](https://bdager.github.io/CHIRLA/leaderboard.html)
+[![Leaderboard](https://img.shields.io/badge/%F0%9F%8F%86-Leaderboard-orange)](https://bdager.github.io/CHIRLA/leaderboard.html)
 
 🏆 **[Leaderboard](https://bdager.github.io/CHIRLA/leaderboard.html)**: Re-ID and tracking results, sortable, with how to submit · 🌐 **[Project page](https://bdager.github.io/CHIRLA/)**
 
