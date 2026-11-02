@@ -142,9 +142,9 @@ Notes:
 
 
 ### 📌 Baselines
-For baseline results and configurations, see our [paper](https://arxiv.org/pdf/2502.06681).  
-
-![tracking results](assets/tracking_res.png)
+Results of all evaluated methods, including the baselines from our paper, are on the
+**[CHIRLA leaderboard](https://bdager.github.io/CHIRLA/leaderboard.html)**, which also explains how to submit yours.
+For the baseline configurations, see our [paper](https://arxiv.org/pdf/2502.06681).
 
 ## 🙏 Acknowledgements
 We thank the open-source community and tools that made this benchmark possible:   [boxmot](https://github.com/mikel-brostrom/boxmot), [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack?utm_source=chatgpt.com),  [BoT-SORT](https://github.com/NirAharon/BoT-SORT), [ByteTrack](https://github.com/FoundationVision/ByteTrack), [OC-SORT](https://github.com/noahcao/OC_SORT), [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT), [TrackEval](https://github.com/JonathonLuiten/TrackEval).

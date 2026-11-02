@@ -145,10 +145,9 @@ To approximate **open-set mAP**, add a threshold argument when running the evalu
 --open-map-threshold <value>
 ```
 
-For detailed results and experimental settings, please refer to our [paper](https://arxiv.org/pdf/2502.06681).
-
-
-![reid results](assets/reid_res.png)
+Results of all evaluated methods, including the baselines from our paper, are on the
+**[CHIRLA leaderboard](https://bdager.github.io/CHIRLA/leaderboard.html)**, which also explains how to submit yours.
+For the experimental settings of the baselines, please refer to our [paper](https://arxiv.org/pdf/2502.06681).
 
 
 ## 🙏 Acknowledgements
