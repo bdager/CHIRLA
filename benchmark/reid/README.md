@@ -83,8 +83,7 @@ python create_embeddings.py \
 
 **DIFFER / SapiensID** (`--model differ` / `--model sapiensid`): clone [DIFFER](https://github.com/xliangp/DIFFER) (commit `67acb5d`) and [SapiensID](https://github.com/mk-minchul/sapiensid) (commit `a8d8011`) into `models/DIFFER` and `models/sapiensid` (or pass `--repo-dir`), and get their weights from each repo. SapiensID also needs `~/.cache/yolov8n-pose.pt`.
 
-> [⚠️IMPORTANT]
-> SapiensID crashes on crops where no person is detected. Apply this one-line fix after cloning:
+> ⚠️ SapiensID crashes on crops where no person is detected. Apply this one-line fix after cloning:
 > ```
 > sed -i 's/len(_keypoints\[0\]) > 0/len(_keypoints) > 0/' models/sapiensid/tasks/sapiensID/src/aligners/keypoint_predictor/__init__.py
 > ```

@@ -110,7 +110,7 @@ The CHIRLA dataset is suitable for:
 
 ## License
 
-The dataset is publicly available under the **CC-BY** license.
+The dataset is publicly available under the **CC-BY** license. The code in this repository is released under the [MIT License](LICENSE).
 
 ## Citation
 
