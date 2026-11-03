@@ -2507,6 +2507,48 @@
      "map": 61.22
     }
    }
+  },
+    {
+   "id": "judgereid-qwen3.6-27b-p16",
+   "method": "JudgeReID",
+   "recipe": "Qwen3.6-27B judge, P=16",
+   "pretrain": "Celeb-reID-light + WebBody12M",
+   "input": "224×224 + 384×384",
+   "weights": "DIFFER + SapiensID",
+   "cite": [
+    "dominguezdager2026judgereid"
+   ],
+   "reported_in": "dominguezdager2026judgereid",
+   "kind": "community",
+   "verified": true,
+   "added": "2026-11-03",
+   "code": "https://github.com/bdager/JudgeReID",
+   "results": {
+    "long_term": {
+     "r1": 46.92,
+     "r5": 65.54,
+     "r10": 78.89,
+     "map": 42.91
+    },
+    "multi_camera_long_term": {
+     "r1": 56.99,
+     "r5": 72.37,
+     "r10": 85.75,
+     "map": 57.49
+    },
+    "multi_camera": {
+     "r1": 76.10,
+     "r5": 85.95,
+     "r10": 91.55,
+     "map": 69.16
+    },
+    "reappearance": {
+     "r1": 77.41,
+     "r5": 87.49,
+     "r10": 94.35,
+     "map": 69.11
+    }
+   }
   }
  ],
  "reid_open": [],
