@@ -121,6 +121,14 @@ table.lb .second { text-decoration: underline; text-decoration-color: var(--mute
 .tag.verified { color: var(--accent); border-color: var(--accent); background: transparent; }
 .citebtn { font: 500 0.8rem "Noto Sans", sans-serif; background: var(--soft); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 0.15rem 0.6rem; cursor: pointer; }
 .citebtn:hover { border-color: var(--accent); }
+.pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.5rem 1rem; margin: 0.6rem 0 0; font-size: 0.88rem; color: var(--muted); }
+.pager[hidden] { display: none; }
+.pager label { display: inline-flex; align-items: center; gap: 0.4rem; }
+.pager select { font: inherit; color: var(--text); background: var(--bg); border: 1.5px solid var(--line); border-radius: 6px; padding: 0.25rem 0.45rem; }
+.pager .nav-btns { display: inline-flex; gap: 0.3rem; }
+.pager button { font: inherit; color: var(--text); background: var(--soft); border: 1px solid var(--line); border-radius: 999px; width: 2rem; height: 2rem; cursor: pointer; }
+.pager button:hover:not(:disabled) { border-color: var(--accent); }
+.pager button:disabled { opacity: 0.4; cursor: default; }
 .legend { color: var(--muted); font-size: 0.85rem; margin: 0.6rem 0 0; }
 .legend b { color: var(--text); }
 .legend u { text-decoration-color: var(--muted); text-underline-offset: 3px; }
@@ -212,7 +220,8 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
         <span class="shown" id="reid-shown" aria-live="polite"></span>
       </div>
       <div class="table-wrap"><table class="lb" id="reid-table"></table></div>
-      <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among the rows shown. Tags list the training recipe, pretraining data, input size and source of the weights; rows without a <span class="tag base">community</span> tag are baselines run by the CHIRLA team. <b>Mean</b> columns average Rank-1 and mAP over the four scenarios; the table is ranked by mean mAP by default.</p>
+      <div class="pager" id="reid-pager"></div>
+      <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among all rows matching the filters. Tags list the training recipe, pretraining data, input size and source of the weights; rows without a <span class="tag base">community</span> tag are baselines run by the CHIRLA team. <b>Mean</b> columns average Rank-1 and mAP over the four scenarios; the table is ranked by mean mAP by default.</p>
     </div>
 
     <div class="panel" id="panel-open" role="tabpanel" aria-labelledby="tab-open" hidden>
@@ -234,7 +243,8 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
       <span class="shown" id="trk-shown" aria-live="polite"></span>
     </div>
     <div class="table-wrap"><table class="lb" id="trk-table"></table></div>
-    <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among the rows shown. Paper baselines use YOLO11n detections and each tracker’s default parameters.</p>
+    <div class="pager" id="trk-pager"></div>
+    <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among all rows matching the filters. Paper baselines use YOLO11n detections and each tracker’s default parameters.</p>
   </section>
 
   <!-- ================= Protocol ================= -->
@@ -396,11 +406,38 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
 
   /* ---------- Generic sortable table ---------- */
   // cols: [{key, label, group, get(row), hib (higher is better), int, hidden(), cls}]
+  var PAGE_SIZES = [10, 20, 50, 0]; // 0 = all rows
   function LeaderTable(table, opts) {
     this.table = table; this.opts = opts; this.sort = opts.defaultSort;
+    this.pageSize = opts.pageSize || 20; this.page = 0;
+    if (opts.pager) this.buildPager(opts.pager);
   }
+  LeaderTable.prototype.buildPager = function (box) {
+    var self = this;
+    var lab = el("label", null, "Rows per page ");
+    var sel = el("select");
+    PAGE_SIZES.forEach(function (n) {
+      var op = el("option", { value: String(n) }, n ? String(n) : "All");
+      if (n === self.pageSize) op.selected = true;
+      sel.appendChild(op);
+    });
+    sel.addEventListener("change", function () { self.pageSize = +sel.value; self.page = 0; self.render(self.rows); });
+    lab.appendChild(sel);
+    this.range = el("span", { "aria-live": "polite" });
+    var btns = el("span", { "class": "nav-btns" });
+    this.prev = el("button", { type: "button", "aria-label": "Previous page" }, "‹");
+    this.next = el("button", { type: "button", "aria-label": "Next page" }, "›");
+    this.prev.addEventListener("click", function () { self.page--; self.render(self.rows); });
+    this.next.addEventListener("click", function () { self.page++; self.render(self.rows); });
+    btns.appendChild(this.prev); btns.appendChild(this.next);
+    box.appendChild(lab); box.appendChild(this.range); box.appendChild(btns);
+    this.pager = box;
+  };
+  // Call when filters change so the view jumps back to the first page.
+  LeaderTable.prototype.reset = function () { this.page = 0; };
   LeaderTable.prototype.render = function (rows) {
     var self = this, o = this.opts, t = this.table;
+    this.rows = rows;
     var cols = o.cols.filter(function (c) { return !c.hidden || !c.hidden(); });
     var sc = cols.filter(function (c) { return c.key === self.sort.key; })[0] || cols[0];
     rows = rows.slice().sort(function (a, b) {
@@ -436,6 +473,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
         var dir = c.hib ? "desc" : "asc";
         if (self.sort.key === c.key) dir = self.sort.dir === "desc" ? "asc" : "desc";
         self.sort = { key: c.key, dir: dir };
+        self.page = 0;
         self.render(rows);
       });
       th.appendChild(b);
@@ -446,9 +484,21 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     if (!rows.length) {
       var tr0 = el("tr"); tr0.appendChild(el("td", { colspan: String(cols.length + 3), "class": "status" }, "No results match these filters.")); tbody.appendChild(tr0);
     }
-    rows.forEach(function (r, i) {
+    // Paging: best/second marks above use all matching rows, not just this page.
+    var size = this.pageSize || rows.length || 1;
+    var pages = Math.max(1, Math.ceil(rows.length / size));
+    this.page = Math.min(Math.max(this.page, 0), pages - 1);
+    var start = this.page * size, pageRows = rows.slice(start, start + size);
+    if (this.pager) {
+      // Hide the pager when every row fits on the smallest page size.
+      this.pager.hidden = rows.length <= PAGE_SIZES[0];
+      this.range.textContent = rows.length ? (start + 1) + "–" + (start + pageRows.length) + " of " + rows.length : "0 of 0";
+      this.prev.disabled = this.page === 0;
+      this.next.disabled = this.page >= pages - 1;
+    }
+    pageRows.forEach(function (r, i) {
       var tr = el("tr");
-      tr.appendChild(el("td", { "class": "sticky1" }, String(i + 1)));
+      tr.appendChild(el("td", { "class": "sticky1" }, String(start + i + 1)));
       var m = el("td", { "class": "sticky2" });
       m.appendChild(el("div", { "class": "mname" }, r.method));
       var tags = el("div", { "class": "tags" });
@@ -509,7 +559,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     });
   });
   var reidTable = new LeaderTable(document.getElementById("reid-table"), {
-    cols: reidCols, defaultSort: { key: "mean.map", dir: "desc" },
+    cols: reidCols, defaultSort: { key: "mean.map", dir: "desc" }, pager: document.getElementById("reid-pager"),
     tags: function (r) {
       var t = [];
       if (r.recipe) t.push([r.recipe]);
@@ -539,7 +589,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     document.getElementById("reid-shown").textContent = rows.length + " of " + DATA.reid_closed.length + " results";
   }
   ["reid-q", "reid-pre", "reid-input", "reid-kind", "reid-ranks"].forEach(function (id) {
-    document.getElementById(id).addEventListener(id === "reid-q" ? "input" : "change", drawReid);
+    document.getElementById(id).addEventListener(id === "reid-q" ? "input" : "change", function () { reidTable.reset(); drawReid(); });
   });
 
   /* ---------- Open-set ---------- */
@@ -579,7 +629,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     { key: "multi.idsw", label: "IDSW", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "idsw"), hib: false, int: true }
   ];
   var trkTable = new LeaderTable(document.getElementById("trk-table"), {
-    cols: trkCols, defaultSort: { key: "all.mota", dir: "desc" }, arrows: true,
+    cols: trkCols, defaultSort: { key: "all.mota", dir: "desc" }, arrows: true, pager: document.getElementById("trk-pager"),
     tags: function (r) {
       var t = [[r.appearance ? "appearance: " + r.appearance : "motion only"]];
       if (r.detector) t.push(["detector: " + r.detector]);
@@ -597,7 +647,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     document.getElementById("trk-shown").textContent = rows.length + " of " + DATA.tracking.length + " results";
   }
   ["trk-q", "trk-kind", "trk-detail"].forEach(function (id) {
-    document.getElementById(id).addEventListener(id === "trk-q" ? "input" : "change", drawTrk);
+    document.getElementById(id).addEventListener(id === "trk-q" ? "input" : "change", function () { trkTable.reset(); drawTrk(); });
   });
 
   /* ---------- Tabs ---------- */
