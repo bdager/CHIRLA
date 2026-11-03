@@ -106,6 +106,7 @@ table.lb tbody tr:hover td { background: var(--soft); }
 table.lb .avg { background: var(--accent-soft); font-weight: 600; }
 table.lb tbody tr:hover td.avg { background: var(--accent-soft); }
 table.lb .best { font-weight: 700; }
+.myear { color: var(--muted); font-weight: 400; font-size: 0.85em; }
 table.lb .second { text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; }
 .sortbtn { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; }
 .sortbtn .arr { font-size: 0.7em; color: var(--muted); }
@@ -221,7 +222,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
       </div>
       <div class="table-wrap"><table class="lb" id="reid-table"></table></div>
       <div class="pager" id="reid-pager"></div>
-      <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among all rows matching the filters. Tags list the training recipe, pretraining data, input size and source of the weights; rows without a <span class="tag base">community</span> tag are baselines run by the CHIRLA team. <b>Mean</b> columns average Rank-1 and mAP over the four scenarios; the table is ranked by mean mAP by default.</p>
+      <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among all rows matching the filters. Tags list the training recipe, pretraining data, input size and source of the weights; rows without a <span class="tag base">community</span> tag are baselines run by the CHIRLA team. <b>Mean</b> columns average Rank-1 and mAP over the four scenarios; the table is ranked by mean mAP by default. The year after each name is when the paper behind the evaluated weights was published.</p>
     </div>
 
     <div class="panel" id="panel-open" role="tabpanel" aria-labelledby="tab-open" hidden>
@@ -244,7 +245,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     </div>
     <div class="table-wrap"><table class="lb" id="trk-table"></table></div>
     <div class="pager" id="trk-pager"></div>
-    <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among all rows matching the filters. Paper baselines use YOLO11n detections and each tracker’s default parameters.</p>
+    <p class="legend"><b>Bold</b>: best in column, <u>underlined</u>: second best, among all rows matching the filters. Paper baselines use YOLO11n detections and each tracker’s default parameters. The year after each name is when the tracker’s paper was published.</p>
   </section>
 
   <!-- ================= Protocol ================= -->
@@ -500,7 +501,10 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
       var tr = el("tr");
       tr.appendChild(el("td", { "class": "sticky1" }, String(start + i + 1)));
       var m = el("td", { "class": "sticky2" });
-      m.appendChild(el("div", { "class": "mname" }, r.method));
+      var nm = el("div", { "class": "mname" }, r.method);
+      var yp = o.yearPaper && PAPERS[o.yearPaper(r)];
+      if (yp && yp.year) nm.appendChild(el("span", { "class": "myear", title: yp.title }, " · " + yp.year));
+      m.appendChild(nm);
       var tags = el("div", { "class": "tags" });
       o.tags(r).forEach(function (tg) { tags.appendChild(el("span", { "class": "tag " + (tg[1] || "") }, tg[0])); });
       m.appendChild(tags);
@@ -560,6 +564,8 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
   });
   var reidTable = new LeaderTable(document.getElementById("reid-table"), {
     cols: reidCols, defaultSort: { key: "mean.map", dir: "desc" }, pager: document.getElementById("reid-pager"),
+    // Year shown after the name: the paper the evaluated weights come from, which is the last one cited.
+    yearPaper: function (r) { return r.cite && r.cite[r.cite.length - 1]; },
     tags: function (r) {
       var t = [];
       if (r.recipe) t.push([r.recipe]);
@@ -630,6 +636,8 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
   ];
   var trkTable = new LeaderTable(document.getElementById("trk-table"), {
     cols: trkCols, defaultSort: { key: "all.mota", dir: "desc" }, arrows: true, pager: document.getElementById("trk-pager"),
+    // Year shown after the name: the tracker's own paper, which is the first one cited.
+    yearPaper: function (r) { return r.cite && r.cite[0]; },
     tags: function (r) {
       var t = [[r.appearance ? "appearance: " + r.appearance : "motion only"]];
       if (r.detector) t.push(["detector: " + r.detector]);
