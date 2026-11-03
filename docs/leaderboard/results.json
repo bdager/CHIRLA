@@ -352,7 +352,8 @@
    "title": "DIFFER: Disentangling identity features via semantic cues for clothes-changing person re-ID",
    "venue": "CVPR",
    "year": 2025,
-   "pages": "13980--13989"
+   "pages": "13980--13989",
+   "url": "https://openaccess.thecvf.com/content/CVPR2025/html/Liang_DIFFER_Disentangling_Identity_Features_via_Semantic_Cues_for_Clothes-Changing_Person_CVPR_2025_paper.html"
   },
   "kim2025sapiensid": {
    "type": "inproceedings",
@@ -362,7 +363,9 @@
    ],
    "title": "SapiensID: Foundation for human recognition",
    "venue": "CVPR",
-   "year": 2025
+   "year": 2025,
+   "pages": "13937--13947",
+   "url": "https://openaccess.thecvf.com/content/CVPR2025/html/Kim_SapiensID_Foundation_for_Human_Recognition_CVPR_2025_paper.html"
   },
   "dominguezdager2026judgereid": {
    "type": "misc",
