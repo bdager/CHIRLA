@@ -52,6 +52,7 @@ h1, h2, h3 { font-family: "Google Sans", "Noto Sans", sans-serif; font-weight: 5
 h2 { font-size: 2rem; text-align: center; margin: 0 0 0.6rem; }
 h3 { font-size: 1.25rem; margin: 1.75rem 0 0.6rem; }
 .lead { text-align: center; color: var(--muted); max-width: 680px; margin: 0 auto 1.5rem; }
+.hero .lead { max-width: 760px; }
 
 /* Nav */
 .nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--nav-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
@@ -185,7 +186,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
 
 <header class="hero container">
   <h1><span class="mark">CHIRLA</span> Leaderboard</h1>
-  <p class="lead">Results on the CHIRLA benchmark for long-term person re-identification and tracking. Baselines come from the CHIRLA paper; new results are added as researchers submit them.</p>
+  <p class="lead">Results on the CHIRLA benchmark for long-term person re-identification and tracking.<br>Baselines come from the CHIRLA paper; new results are added as researchers submit them.</p>
   <p class="meta" id="meta">Loading results…</p>
   <ul class="buttons">
     <li><a href="#submit"><i class="fa-solid fa-plus"></i>Submit a result</a></li>
@@ -627,12 +628,12 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     { key: "all.fp", label: "FP", group: "All test set", get: tget("all", "fp"), hib: false, int: true, hidden: dHidden },
     { key: "all.idsw", label: "IDSW", group: "All test set", get: tget("all", "idsw"), hib: false, int: true },
     { key: "all.fm", label: "FM", group: "All test set", get: tget("all", "fm"), hib: false, int: true, hidden: dHidden },
-    { key: "brief.mota", label: "MOTA", group: "Brief occlusions", get: tget("brief_occlusions", "mota"), hib: true },
-    { key: "brief.idf1", label: "IDF1", group: "Brief occlusions", get: tget("brief_occlusions", "idf1"), hib: true },
-    { key: "brief.idsw", label: "IDSW", group: "Brief occlusions", get: tget("brief_occlusions", "idsw"), hib: false, int: true },
-    { key: "multi.mota", label: "MOTA", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "mota"), hib: true },
-    { key: "multi.idf1", label: "IDF1", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "idf1"), hib: true },
-    { key: "multi.idsw", label: "IDSW", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "idsw"), hib: false, int: true }
+    { key: "brief_occlusions.mota", label: "MOTA", group: "Brief occlusions", get: tget("brief_occlusions", "mota"), hib: true },
+    { key: "brief_occlusions.idf1", label: "IDF1", group: "Brief occlusions", get: tget("brief_occlusions", "idf1"), hib: true },
+    { key: "brief_occlusions.idsw", label: "IDSW", group: "Brief occlusions", get: tget("brief_occlusions", "idsw"), hib: false, int: true },
+    { key: "multiple_people_occlusions.mota", label: "MOTA", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "mota"), hib: true },
+    { key: "multiple_people_occlusions.idf1", label: "IDF1", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "idf1"), hib: true },
+    { key: "multiple_people_occlusions.idsw", label: "IDSW", group: "Multiple people and occlusions", get: tget("multiple_people_occlusions", "idsw"), hib: false, int: true }
   ];
   var trkTable = new LeaderTable(document.getElementById("trk-table"), {
     cols: trkCols, defaultSort: { key: "all.mota", dir: "desc" }, arrows: true, pager: document.getElementById("trk-pager"),
@@ -657,6 +658,68 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
   ["trk-q", "trk-kind", "trk-detail"].forEach(function (id) {
     document.getElementById(id).addEventListener(id === "trk-q" ? "input" : "change", function () { trkTable.reset(); drawTrk(); });
   });
+
+  /* ---------- CSV download ---------- */
+  // All results (ignores filters), one row per entry, every metric column, sorted by the table's default ranking.
+  function csvCell(v) { v = v == null ? "" : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function toCsv(table, entries, before, after) {
+    var o = table.opts, sc = o.cols.filter(function (c) { return c.key === o.defaultSort.key; })[0];
+    entries = entries.slice().sort(function (a, b) {
+      var va = sc.get(a), vb = sc.get(b);
+      if (va == null) return 1; if (vb == null) return -1;
+      return o.defaultSort.dir === "desc" ? vb - va : va - vb;
+    });
+    var head = before.map(function (f) { return f[0]; })
+      .concat(o.cols.map(function (c) { return c.key.replace(".", "_"); }))
+      .concat(after.map(function (f) { return f[0]; }));
+    var lines = [head.join(",")];
+    entries.forEach(function (r) {
+      var cells = before.map(function (f) { return f[1](r); })
+        .concat(o.cols.map(function (c) { return c.get(r); }))
+        .concat(after.map(function (f) { return f[1](r); }));
+      lines.push(cells.map(csvCell).join(","));
+    });
+    return "\uFEFF" + lines.join("\r\n") + "\r\n"; // BOM so Excel reads × and – correctly
+  }
+  function yearOf(table) { return function (r) { var p = PAPERS[table.opts.yearPaper(r)]; return p ? p.year : null; }; }
+  var CSV_TAIL = [
+    ["source", function (r) { return r.kind; }],
+    ["verified", function (r) { return r.verified ? "yes" : "no"; }],
+    ["added", function (r) { return r.added; }],
+    ["code", function (r) { return r.code; }],
+    ["cite", function (r) { return (r.cite || []).join(";"); }],
+    ["reported_in", function (r) { return r.reported_in; }]
+  ];
+  function reidCsv() {
+    var closed = DATA.reid_closed.map(function (r) { return Object.assign({ setting: "closed" }, r); });
+    var open = DATA.reid_open.map(function (r) { return Object.assign({ setting: "open" }, r); });
+    return toCsv(reidTable, closed.concat(open), [
+      ["method", function (r) { return r.method; }],
+      ["year", yearOf(reidTable)],
+      ["setting", function (r) { return r.setting; }],
+      ["recipe", function (r) { return r.recipe; }],
+      ["pretrain", function (r) { return r.pretrain; }],
+      ["input", function (r) { return r.input; }],
+      ["weights", function (r) { return r.weights; }]
+    ], CSV_TAIL);
+  }
+  function trkCsv() {
+    return toCsv(trkTable, DATA.tracking, [
+      ["method", function (r) { return r.method; }],
+      ["year", yearOf(trkTable)],
+      ["appearance", function (r) { return r.appearance; }],
+      ["detector", function (r) { return r.detector; }]
+    ], CSV_TAIL);
+  }
+  function csvLink(text, filename, build) {
+    var a = el("a", { href: "#", download: filename }, text);
+    a.addEventListener("click", function (e) {
+      var url = URL.createObjectURL(new Blob([build()], { type: "text/csv;charset=utf-8" }));
+      a.href = url;
+      setTimeout(function () { URL.revokeObjectURL(url); a.href = "#"; }, 1000);
+    });
+    return a;
+  }
 
   /* ---------- Tabs ---------- */
   var tabs = document.querySelectorAll(".tab");
@@ -685,9 +748,15 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     var n = DATA.reid_closed.length + DATA.reid_open.length + DATA.tracking.length;
     var community = DATA.reid_closed.concat(DATA.reid_open, DATA.tracking).filter(function (r) { return r.kind === "community"; }).length;
     // Only mention community results once there are some; "0 from the community" reads as a negative.
-    document.getElementById("meta").textContent = n + " results" + (community ? " (" + community + " from the community)" : "") + ". Last updated " + fmtDate(DATA.updated) + ".";
+    var meta = document.getElementById("meta");
+    meta.textContent = n + " results" + (community ? " (" + community + " from the community)" : "") + ". Last updated " + fmtDate(DATA.updated) + ".";
     document.getElementById("count-closed").textContent = DATA.reid_closed.length;
     document.getElementById("count-open").textContent = DATA.reid_open.length;
+    meta.appendChild(document.createTextNode(" Download all results as CSV: "));
+    meta.appendChild(csvLink("re-identification", "chirla_reid_" + DATA.updated + ".csv", reidCsv));
+    meta.appendChild(document.createTextNode(", "));
+    meta.appendChild(csvLink("tracking", "chirla_tracking_" + DATA.updated + ".csv", trkCsv));
+    meta.appendChild(document.createTextNode("."));
     drawReid(); drawOpen(); drawTrk();
   }).catch(function () {
     var msg = "Couldn’t load leaderboard/results.json. If you opened this file from your computer, run “python -m http.server” in the docs folder and open http://localhost:8000/leaderboard.html.";
