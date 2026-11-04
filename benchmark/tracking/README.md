@@ -132,6 +132,16 @@ Creates: `<output>/<CHIRLA_brief|CHIRLA_multi>-{train,test}/<Tracker>/data/<seq_
 
 <output_root>/CHIRLA_brief-train/<Tracker>/data/seq_004_camera_1_xxx.txt -->
 
+## 🚀 Steps 3 to 5 in One Command
+Once your tracker's CHIRLA_all results are in `benchmark/tracking/data/trackers/CHIRLA_all-test/<TrackerName>/data/`, this checks them, builds the brief/multi results, runs TrackEval on the three benchmarks and writes the leaderboard entry:
+
+```bash
+python benchmark/tracking/make_submission.py --tracker BoT-SORT-reid \
+	--method "BoT-SORT" --detector YOLO11n --appearance "OSNet x0.25 (MSMT17)"
+```
+
+It writes `submission.json` and prints the results for the [tracking submission form](https://github.com/bdager/CHIRLA/issues/new?template=submit-tracking.yml). The steps below do the same one by one.
+
 ## 3) Generate Subset Tracker Results
 After producing CHIRLA_all tracker results, you can build **brief/multi** tracker files by sampling CHIRLA_all outputs using per-frame IoU best-match:
 

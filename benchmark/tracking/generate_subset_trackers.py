@@ -174,6 +174,43 @@ def dedupe_frame_ids(file_path: Path) -> int:
     return removed
 
 
+def generate_subset(gt_root: Path, tracker_root: Path, source_benchmark: str, benchmark: str, split: str,
+                    tracker_name: str, min_iou: float = 0.5, dry_run: bool = False) -> bool:
+    """Build <benchmark>-<split>/<tracker_name> from the source benchmark results, False if inputs are missing"""
+    gt_split_dir = gt_root / f"{benchmark}-{split}"
+    if not gt_split_dir.exists():
+        print(f"[WARN] Missing GT split dir: {gt_split_dir}")
+        return False
+    # sequences are directories under gt_split_dir
+    seq_dirs = [p for p in gt_split_dir.iterdir() if p.is_dir()]
+    # Source tracker location (we try same split under source benchmark)
+    source_tracker_dir = tracker_root / f"{source_benchmark}-{split}" / tracker_name / 'data'
+    if not source_tracker_dir.exists():
+        print(f"[WARN] Source tracker dir missing: {source_tracker_dir}; skipping {tracker_name} {split}")
+        return False
+    out_tracker_dir = tracker_root / f"{benchmark}-{split}" / tracker_name / 'data'
+    created_total = 0
+    written_total = 0
+    for seq_dir in seq_dirs:
+        seq_name = seq_dir.name  # e.g., seq_000_camera_1_...
+        source_file = source_tracker_dir / f"{seq_name}.txt"
+        out_file = out_tracker_dir / f"{seq_name}.txt"
+        created_total += 1
+        if dry_run:
+            continue
+        written = synthesize_sequence(seq_dir, source_file, out_file, min_iou)
+        # Deduplicate frame-id pairs post generation (simple safeguard)
+        dups = dedupe_frame_ids(out_file)
+        if dups:
+            print(f"[DEDUP] Removed {dups} duplicate frame-id rows in {out_file.name}")
+        written_total += (written - dups)
+    if dry_run:
+        print(f"[DRY] {benchmark}-{split} {tracker_name}: would process {created_total} sequences -> {out_tracker_dir}")
+    else:
+        print(f"[OK] {benchmark}-{split} {tracker_name}: processed {created_total} sequences, wrote {written_total} rows -> {out_tracker_dir}")
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate subset tracker data for sparse CHIRLA benchmarks")
     parser.add_argument('--source_benchmark', default='CHIRLA_all', help='Benchmark providing full tracker outputs')
@@ -188,42 +225,12 @@ def main():
 
     gt_root = Path(args.gt_root)
     tracker_root = Path(args.tracker_root)
-    source_root = tracker_root
 
     for benchmark in args.target_benchmarks:
         for split in args.splits:
-            gt_split_dir = gt_root / f"{benchmark}-{split}"
-            if not gt_split_dir.exists():
-                print(f"[WARN] Missing GT split dir: {gt_split_dir}")
-                continue
-            # sequences are directories under gt_split_dir
-            seq_dirs = [p for p in gt_split_dir.iterdir() if p.is_dir()]
             for tracker_name in args.trackers:
-                # Source tracker location (we try same split under source benchmark)
-                source_tracker_dir = source_root / f"{args.source_benchmark}-{split}" / tracker_name / 'data'
-                if not source_tracker_dir.exists():
-                    print(f"[WARN] Source tracker dir missing: {source_tracker_dir}; skipping {tracker_name} {split}")
-                    continue
-                out_tracker_dir = tracker_root / f"{benchmark}-{split}" / tracker_name / 'data'
-                created_total = 0
-                written_total = 0
-                for seq_dir in seq_dirs:
-                    seq_name = seq_dir.name  # e.g., seq_000_camera_1_...
-                    source_file = source_tracker_dir / f"{seq_name}.txt"
-                    out_file = out_tracker_dir / f"{seq_name}.txt"
-                    created_total += 1
-                    if args.dry_run:
-                        continue
-                    written = synthesize_sequence(seq_dir, source_file, out_file, args.min_iou)
-                    # Deduplicate frame-id pairs post generation (simple safeguard)
-                    dups = dedupe_frame_ids(out_file)
-                    if dups:
-                        print(f"[DEDUP] Removed {dups} duplicate frame-id rows in {out_file.name}")
-                    written_total += (written - dups)
-                if args.dry_run:
-                    print(f"[DRY] {benchmark}-{split} {tracker_name}: would process {created_total} sequences -> {out_tracker_dir}")
-                else:
-                    print(f"[OK] {benchmark}-{split} {tracker_name}: processed {created_total} sequences, wrote {written_total} rows -> {out_tracker_dir}")
+                generate_subset(gt_root, tracker_root, args.source_benchmark, benchmark, split,
+                                tracker_name, args.min_iou, args.dry_run)
 
 
 if __name__ == '__main__':

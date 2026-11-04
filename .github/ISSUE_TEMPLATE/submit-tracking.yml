@@ -9,9 +9,10 @@ body:
         Thanks for evaluating on CHIRLA! Please follow the protocol on the
         [leaderboard page](https://bdager.github.io/CHIRLA/leaderboard.html#protocol).
 
-        Evaluate with TrackEval on CHIRLA_all, CHIRLA_brief and CHIRLA_multi, then run
-        [`export_leaderboard.py tracking`](https://github.com/bdager/CHIRLA/tree/main/benchmark/tracking#5-create-the-leaderboard-entry)
-        to get the results below in the right format.
+        The easiest way to get the numbers in the right format is
+        [`make_submission.py`](https://github.com/bdager/CHIRLA/tree/main/benchmark/tracking#-steps-3-to-5-in-one-command):
+        it checks your tracker's results, runs TrackEval on CHIRLA_all, CHIRLA_brief and CHIRLA_multi
+        and prints the results box below.
   - type: input
     id: method
     attributes:
@@ -58,7 +59,7 @@ body:
     id: results
     attributes:
       label: Results
-      description: Test split. MOTA and IDF1 in percent, the rest as counts. This is the "results" object of the export_leaderboard.py output.
+      description: Test split. MOTA and IDF1 in percent, the rest as counts. make_submission.py prints this block.
       render: json
       value: |
         {
@@ -72,7 +73,7 @@ body:
     id: entry
     attributes:
       label: Leaderboard entry (optional)
-      description: Paste the full JSON written by export_leaderboard.py, it speeds up the review.
+      description: Paste the submission.json written by make_submission.py, it speeds up the review.
       render: json
   - type: checkboxes
     id: confirm

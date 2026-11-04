@@ -293,11 +293,10 @@ python make_submission.py embeddings/mymethod \
       </div>
       <div class="card">
         <h3><i class="fa-solid fa-route"></i>Tracking: get your results</h3>
-        <p style="margin:0 0 0.4rem;font-size:0.95rem">Evaluate with <a href="https://github.com/bdager/CHIRLA/tree/main/benchmark/tracking#4-evaluate-with-trackeval">TrackEval</a> on CHIRLA_all, CHIRLA_brief and CHIRLA_multi, then export the results:</p>
-<pre><code>python benchmark/export_leaderboard.py tracking \
-  --trackers-folder benchmark/tracking/data/trackers \
+        <p style="margin:0 0 0.4rem;font-size:0.95rem">Write your tracker's <a href="https://github.com/bdager/CHIRLA/tree/main/benchmark/tracking#-steps-3-to-5-in-one-command">CHIRLA_all results</a> in MOT format, then check, evaluate with TrackEval and export them in one command:</p>
+<pre><code>python benchmark/tracking/make_submission.py \
   --tracker MyTracker --method "MyTracker" \
-  --detector YOLO11n --out submission.json</code></pre>
+  --detector YOLO11n</code></pre>
       </div>
     </div>
     <p class="narrow" style="font-size:0.92rem;color:var(--muted);margin:0.75rem auto 1.25rem">Both write <code>submission.json</code>, your entry in the leaderboard format. Copy its <code>results</code> into the form, or the whole entry into a pull request.</p>
