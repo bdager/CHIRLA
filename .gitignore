@@ -21,3 +21,5 @@ benchmark/reid/models_&_embeddings.zip
 benchmark/tracking/data_&_models.zip
 
 *__pycache__/
+
+CLAUDE.md

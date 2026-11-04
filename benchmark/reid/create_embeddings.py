@@ -208,11 +208,15 @@ def extract_embeddings(csv_path, input_dir, output_dir,
     num_images = len(image_paths)
     print(f"Processing {num_images} images from {csv_path}")
 
-    # Create HDF5 file
+    # Only images that load are written, unused rows are cut at the end
+    skipped = []
+    written = 0
     with h5py.File(output_file, "w") as h5f:
-        emb_dataset = h5f.create_dataset("embeddings", shape=(num_images, emb_dim), dtype=np.float32)
-        ids_dataset = h5f.create_dataset("ids", shape=(num_images,), dtype=np.int32)
-        paths_dataset = h5f.create_dataset("paths", shape=(num_images,), dtype=h5py.string_dtype())
+        emb_dataset = h5f.create_dataset("embeddings", shape=(num_images, emb_dim),
+                                         maxshape=(None, emb_dim), dtype=np.float32)
+        ids_dataset = h5f.create_dataset("ids", shape=(num_images,), maxshape=(None,), dtype=np.int32)
+        paths_dataset = h5f.create_dataset("paths", shape=(num_images,), maxshape=(None,),
+                                           dtype=h5py.string_dtype())
 
         for start in tqdm(range(0, num_images, batch_size),
                           desc="Extracting embeddings"):
@@ -229,8 +233,9 @@ def extract_embeddings(csv_path, input_dir, output_dir,
                     img = model.transform(img)
                     batch_images.append(img)
                     valid_indices.append(i)
-                except (OSError, IOError, Exception) as e:
+                except Exception as e:
                     print(f"Warning: Skipping corrupted image {path}: {e}")
+                    skipped.append(path)
                     continue
 
             if not batch_images:
@@ -249,14 +254,22 @@ def extract_embeddings(csv_path, input_dir, output_dir,
                 embeddings = model(batch_tensor)  # [B, emb_dim]
                 embeddings = torch.nn.functional.normalize(embeddings, dim=1)  # L2 normalize
 
-            # Save to HDF5 (only for valid images)
-            for j, (emb, img_id, img_path) in enumerate(zip(embeddings.cpu().numpy(), valid_batch_ids, valid_batch_paths)):
-                actual_idx = start + valid_indices[j]
-                emb_dataset[actual_idx] = emb
-                ids_dataset[actual_idx] = img_id
-                paths_dataset[actual_idx] = img_path
+            # Rows are packed one after another
+            n = len(valid_indices)
+            emb_dataset[written:written + n] = embeddings.cpu().numpy()
+            ids_dataset[written:written + n] = valid_batch_ids
+            paths_dataset[written:written + n] = valid_batch_paths
+            written += n
 
-    print(f"✅ Saved embeddings to {output_file}")
+        if written < num_images:
+            for ds in (emb_dataset, ids_dataset, paths_dataset):
+                ds.resize(written, axis=0)
+
+    print(f"✅ Saved {written} embeddings to {output_file}")
+    if skipped:
+        print(f"⚠️  {len(skipped)} image(s) could not be read and are missing from the file. "
+              f"Results are not comparable with the leaderboard until they are fixed. First ones:\n  - "
+              + "\n  - ".join(skipped[:10]))
 
 
 if __name__ == "__main__":

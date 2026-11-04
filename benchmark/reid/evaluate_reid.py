@@ -52,7 +52,7 @@ def extract_subset_from_path(path):
         # Flattened Centroids-ReID format - extract from filename
         filename = os.path.basename(path)
         parts = filename.split('_')
-        if len(parts) >= 2:
+        if len(parts) >= 2 and parts[0] in ('test', 'train') and parts[1].isdigit():
             return f"{parts[0]}_{parts[1]}"  # e.g., 'test_2', 'train_1', etc.
         return "unknown"
 
@@ -254,7 +254,19 @@ def evaluate_per_subset(query_emb, query_ids, query_paths, gallery_emb, gallery_
     
     logger.info(f"Found query subsets: {sorted(list(query_subsets.keys()))}")
     logger.info(f"Found gallery subsets: {sorted(list(gallery_subsets.keys()))}")
-    
+
+    for name, subsets in (("query", query_subsets), ("gallery", gallery_subsets)):
+        if "unknown" in subsets:
+            bad = subsets["unknown"]["paths"]
+            raise ValueError(
+                f"{len(bad)} {name} path(s) have no train_k/test_k subset, e.g. {bad[0]!r}. "
+                "Paths must keep the benchmark layout (.../train/train_k/... or .../test/test_k/...)")
+    missing = sorted(q.replace('test_', 'train_') for q in query_subsets
+                     if q.replace('test_', 'train_') not in gallery_subsets)
+    if missing:
+        raise ValueError(f"Gallery has no {missing} to match the query subsets. "
+                         "Check that gallery and query files are from the same scenario")
+
     valid_results = []
     
     # Sort query subsets for consistent ordering
@@ -270,18 +282,12 @@ def evaluate_per_subset(query_emb, query_ids, query_paths, gallery_emb, gallery_
 
         # Find corresponding gallery subset (e.g., test_1 -> train_1)
         corresponding_gallery_subset = query_subset.replace('test_', 'train_')
+        gallery_subset_data = gallery_subsets[corresponding_gallery_subset]
+        g_emb = gallery_subset_data['embeddings']
+        g_ids = gallery_subset_data['ids']
+        g_paths = gallery_subset_data['paths']
 
-        if corresponding_gallery_subset in gallery_subsets:
-            gallery_subset_data = gallery_subsets[corresponding_gallery_subset]
-            g_emb = gallery_subset_data['embeddings']
-            g_ids = gallery_subset_data['ids']
-            g_paths = gallery_subset_data['paths']
-
-            logger.info(f"Using corresponding gallery subset {corresponding_gallery_subset}: {g_emb.shape[0]} samples, {len(np.unique(g_ids))} unique IDs")
-        else:
-            logger.warning(f"No corresponding gallery subset found for {query_subset} (looking for {corresponding_gallery_subset})")
-            logger.info("Falling back to using entire gallery")
-            g_emb, g_ids, g_paths = gallery_emb, gallery_ids, gallery_paths
+        logger.info(f"Using corresponding gallery subset {corresponding_gallery_subset}: {g_emb.shape[0]} samples, {len(np.unique(g_ids))} unique IDs")
 
         subset_csv = None
         if csv_path is not None:
@@ -299,14 +305,17 @@ def evaluate_per_subset(query_emb, query_ids, query_paths, gallery_emb, gallery_
             logger.info(f"  CMC Rank-{k}: {score*100:.2f}%")
         logger.info(f"  mAP: {mAP*100:.2f}%")
         
-        # Only include subsets with valid results (mAP > 0 or CMC > 0)
-        if mAP > 0 or any(cmc_scores > 0):
-            valid_results.append({
-                'cmc_scores': cmc_scores,
-                'mAP': mAP,
-                'subset': query_subset,
-                'num_queries': q_emb.shape[0]
-            })
+        # Every subset counts (including 0 scored-subsets, excluding
+        # distractor-only subsets) 
+        if 'closed_set' not in detailed_results:
+            logger.warning(f"{query_subset} has no query IDs that are in the gallery, left out of the average")
+            continue
+        valid_results.append({
+            'cmc_scores': cmc_scores,
+            'mAP': mAP,
+            'subset': query_subset,
+            'num_queries': q_emb.shape[0]
+        })
 
     if subset_csvs:
         concat_csvs(subset_csvs, csv_path)
@@ -365,7 +374,19 @@ def load_h5_embeddings(h5_path):
         embeddings = f["embeddings"][:]
         ids = f["ids"][:]
         paths = f["paths"][:].astype(str)
+    check_embeddings(h5_path, embeddings, paths)
     return embeddings, ids, paths
+
+
+def check_embeddings(h5_path, embeddings, paths):
+    """Stop on rows that can't be scored: empty paths, NaN/inf or all-zero embeddings"""
+    bad = (paths == "") | ~np.isfinite(embeddings).all(axis=1) | (np.linalg.norm(embeddings, axis=1) == 0)
+    if bad.any():
+        idx = np.flatnonzero(bad)
+        raise ValueError(
+            f"{h5_path}: {len(idx)} of {len(paths)} rows are empty or have zero/NaN embeddings "
+            f"(rows {idx[:10].tolist()}). Usually images that failed to load, "
+            "re-extract them or remove those rows")
 
 
 def run_evaluation(gallery_h5, query_h5, topk=[1, 5, 10], per_subset=True,

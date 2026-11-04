@@ -383,18 +383,17 @@ def extract_embeddings(
             print(f"First 10 corrupted files:\n  - " + "\n  - ".join(failed_all[:10]))
         return
 
-    # Assemble full embedding matrix, filling zeros for failed images
-    N = len(dataset)
-    feats_full = np.zeros((N, emb_dim), dtype=np.float32)
-    for idx, vec in features.items():
-        if 0 <= idx < N:
-            feats_full[idx] = vec
-
-    # Prepare ids and paths arrays consistent with FastReID HDF5 outputs
+    # Failed images are left out, a zero row would break cosine similarity
     if 'id' not in df.columns:
         raise ValueError("CSV must contain an 'id' column for person IDs")
-    ids = df['id'].astype(np.int32).to_numpy()
-    paths = dataset.df['abs_path'].astype(str).to_list()
+    N = len(dataset)
+    keep = sorted(idx for idx in features if 0 <= idx < N)
+    feats_full = np.stack([features[idx] for idx in keep]).astype(np.float32)
+    ids = df['id'].astype(np.int32).to_numpy()[keep]
+    paths = dataset.df['abs_path'].astype(str).iloc[keep].to_list()
+    if len(keep) < N:
+        print(f"⚠️  {N - len(keep)} image(s) failed and are missing from the file, "
+              f"results are not comparable with the leaderboard")
 
     # Write HDF5
     with h5py.File(h5_out, "w") as h5f:

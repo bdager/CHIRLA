@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 import argparse
 import csv
 
@@ -75,20 +76,24 @@ def get_evaluation(gallery_h5, query_h5, topk=[1, 5, 10], per_subset=True, open_
     except ImportError as e:
         print(f"❌ Failed to import evaluation utilities: {e}")
         return None
-    return run_evaluation(
-        gallery_h5=gallery_h5,
-        query_h5=query_h5,
-        topk=topk,
-        per_subset=per_subset,
-        open_map_threshold=open_map_threshold,
-        visualize=False,
-        show_logs=False,
-    )
+    try:
+        return run_evaluation(
+            gallery_h5=gallery_h5,
+            query_h5=query_h5,
+            topk=topk,
+            per_subset=per_subset,
+            open_map_threshold=open_map_threshold,
+            visualize=False,
+            show_logs=False,
+        )
+    except ValueError as e:
+        print(f"❌ {e}")
+        return None
 
 
 def main():
     parser = argparse.ArgumentParser(description="Run evaluation on all gallery/query H5 pairs in a folder")
-    parser.add_argument("--base-dir", default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/fastreid",
+    parser.add_argument("--base-dir", required=True,
                         help="Base directory containing H5 files (e.g., fastreid or CION subfolders)")
     parser.add_argument("--output", default="evaluation_results.csv",
                         help="Output CSV file for results")
@@ -115,6 +120,7 @@ def main():
     
     # Run evaluations
     results = []
+    failed = []
     use_per_subset = not args.no_per_subset
     
     for gallery_h5, query_h5, model_name, scenario in pairs:
@@ -127,7 +133,9 @@ def main():
             gallery_h5, query_h5, args.topk, per_subset=use_per_subset, open_map_threshold=args.open_map_threshold
         )
         filter_metrics = {}
-        if metrics:
+        if not metrics:
+            failed.append(f"{model_name}/{scenario}")
+        else:
             # metrics['cmc_scores'] is an array aligned with args.topk
             for k, score in zip(args.topk, metrics['cmc_scores']):
                 filter_metrics[f"CMC@{k}"] = round(float(score) * 100, 2)
@@ -184,6 +192,10 @@ def main():
             print(f"{scenario}: {model} (mAP: {mAP:.2f}%)")
     else:
         print("No successful evaluations completed.")
+
+    if failed:
+        print(f"\n❌ {len(failed)} pair(s) failed and are not in the CSV: {', '.join(failed)}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
