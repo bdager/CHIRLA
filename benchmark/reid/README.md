@@ -105,13 +105,13 @@ To run the embedding extraction, make sure to:
 - Download the required pre-trained model weights and configuration files from each repository.  
 
 
-Use `create_embeddings.py` for one CSV or `get_embeddings_*.py` scripts for batches.
+Use `create_embeddings.py` for one CSV or `get_embeddings_*.py` scripts for batches. Commands are run from `benchmark/reid`. By default, the scripts look for the repositories in `models/` (`models/fast-reid`, `models/centroids-reid`, `models/cion`), read the dataset from `data/CHIRLA/benchmark` at the repository root, and write to `embeddings/<method>/`.
 
-Example (single CSV):
+Example (single CSV, FastReID cloned into `models/fast-reid`; `--config` and `--cktp` are relative to that folder):
 ```
 python create_embeddings.py \
-  --csv metadata/reid_multi_camera_gallery.csv \
-  --input ../data/CHIRLA/benchmark \
+  --csv ../metadata/reid_multi_camera_gallery.csv \
+  --input ../../data/CHIRLA/benchmark \
   --output embeddings/fastreid \
   --config configs/Market1501/bagtricks_R101-ibn.yml \
   --cktp checkpoints/market_bot_R101-ibn.pth
@@ -149,14 +149,23 @@ python evaluate_reid.py     --gallery embeddings/gallery_train_k.h5     --query 
 Run evaluation across scenarios for a specific Re-ID model embedding:
 
 ```bash
-python run_all_evaluations.py     --base-dir fastreid     --output evaluation_results.csv
+python run_all_evaluations.py     --base-dir embeddings/fastreid     --output evaluation_results.csv
 ```
 
 Arguments:  
-- `--base-dir`: Base directory containing HDF5 files (e.g., `fastreid`, `CION/` or any model you use to extract the embeddings)  
+- `--base-dir`: Base directory containing HDF5 files (e.g., `embeddings/fastreid`, `embeddings/CION` or any model you use to extract the embeddings). Each subfolder is evaluated as a separate model  
 - `--output`: Output CSV file for results (default: `evaluation_results.csv`)  
 
 By default, batch evaluation averages metrics across subsets.
+
+To turn the CSV into [leaderboard](https://bdager.github.io/CHIRLA/leaderboard.html#submit) entries (one per model in the CSV, or pick one with `--model`), run from `benchmark/reid`:
+
+```bash
+python ../export_leaderboard.py reid --csv evaluation_results.csv \
+  --method "MyMethod (ResNet50)" --input 256x128 --pretrain MSMT17 --out submission.json
+```
+
+For a single model, [`make_submission.py`](#-quick-start-from-your-model-to-a-leaderboard-entry) does the check, the evaluation and this export in one command.
 
 <!-- ### 11. Code Reference
 | Script | Purpose |

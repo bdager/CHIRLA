@@ -28,13 +28,21 @@ frame,id,x,y,w,h,conf,-1,-1,-1
 ```
 
 
+## 0) Setup
+Commands below are run from the repository root, with the dataset in `data/CHIRLA`. Install the dependencies and clone our [TrackEval](https://github.com/bdager/TrackEval) fork, which adds the CHIRLA evaluation script:
+
+```bash
+pip install -r benchmark/tracking/requirements.txt
+git clone https://github.com/bdager/TrackEval.git benchmark/tracking/TrackEval
+```
+
 ## 1) Prepare Ground Truth in MOT format
 Create MOT-style GT for **CHIRLA_all** (all annotations from CHIRLA dataset) and seqmaps:
 
 ```bash
 python benchmark/tracking/annotations_to_MOT.py \
 	--input_dir data/CHIRLA/annotations \
-	--output_dir benchmark/tracking_MOT \
+	--output_dir benchmark/tracking/data/gt \
 	--verbose
 ```
 
@@ -43,14 +51,14 @@ Create scenario-specific GT (brief and multiple-people-occlusion) with seqmaps:
 ```bash
 python benchmark/tracking/benchmark_to_MOT.py \
 	--input_dir data/CHIRLA/benchmark/tracking \
-	--output_dir benchmark/tracking_MOT \
+	--output_dir benchmark/tracking/data/gt \
 	--scenario all --split all --verbose
 ```
 
 Outputs:
-- `benchmark/tracking_MOT/CHIRLA_all-{train,test}/<seq_cam_time>/gt/gt.txt`
-- `benchmark/tracking_MOT/CHIRLA_{scenario}-{train,test}/<seq_cam_time>/gt/gt.txt`
-- `benchmark/tracking_MOT/seqmaps/CHIRLA_*-{train,test}.txt`
+- `benchmark/tracking/data/gt/CHIRLA_all-{train,test}/<seq_cam_time>/gt/gt.txt`
+- `benchmark/tracking/data/gt/CHIRLA_{brief,multi}-{train,test}/<seq_cam_time>/gt/gt.txt`
+- `benchmark/tracking/data/gt/seqmaps/CHIRLA_*-{train,test}.txt`
 
 ## 2) Run tracking over videos (write MOT results)
 We provide scripts to run trackers via [boxmot](https://github.com/mikel-brostrom/boxmot) with YOLO as detector:  
@@ -73,6 +81,16 @@ Supported trackers: [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrac
 - [StrongSORT](https://github.com/dyhBUPT/StrongSORT) –    *Make DeepSORT Great Again*    [GitHub reference](https://github.com/dyhBUPT/StrongSORT) -->
 
 We run these methods with **Python 3.11** using the module versions specified in [requirements.txt](requirements.txt).
+
+**Tracker folder names:** the CLI name (`--tracker`) and the folder the results are written to are different. Steps 3 to 5 use the folder name:
+
+| `--tracker` | Folder |
+|---|---|
+| `boosttrack` / `boosttrack+` / `boosttrack++` | `BoostTrack` / `BoostTrack+` / `BoostTrack++` |
+| `bytetrack` | `ByteTrack` |
+| `ocsort` / `deepocsort` | `OC-SORT` / `Deep-OC-SORT` |
+| `strongsort` | `StrongSORT` |
+| `botsort` | `BoT-SORT`, or `BoT-SORT-reid` with `--with-reid` |
 
 ### Batch Process All Videos
 ```
@@ -114,7 +132,7 @@ Creates: `<output>/<CHIRLA_brief|CHIRLA_multi>-{train,test}/<Tracker>/data/<seq_
 
 <output_root>/CHIRLA_brief-train/<Tracker>/data/seq_004_camera_1_xxx.txt -->
 
-## 4) Generate Subset Tracker Results
+## 3) Generate Subset Tracker Results
 After producing CHIRLA_all tracker results, you can build **brief/multi** tracker files by sampling CHIRLA_all outputs using per-frame IoU best-match:
 
 ```bash
@@ -122,28 +140,45 @@ python benchmark/tracking/generate_subset_trackers.py \
 	--source_benchmark CHIRLA_all \
 	--target_benchmarks CHIRLA_brief CHIRLA_multi \
 	--splits test \
-	--trackers bytetrack botsort \
+	--trackers ByteTrack BoT-SORT-reid \
 	--gt_root benchmark/tracking/data/gt \
-	--tracker_root benchmark/tracking/data/trackers \
+	--tracker_root benchmark/tracking/data/trackers
 ```
 
-## 5) Evaluate with TrackEval
-Run [TrackEval](https://github.com/bdager/TrackEval):
-```
+## 4) Evaluate with TrackEval
+Run [TrackEval](https://github.com/bdager/TrackEval) once per benchmark (`CHIRLA_all`, `CHIRLA_brief` and `CHIRLA_multi`):
+```bash
+for b in CHIRLA_all CHIRLA_brief CHIRLA_multi; do
 python benchmark/tracking/TrackEval/scripts/run_chirla_challenge.py \
---GT_FOLDER benchmark/tracking/data/gt \
---TRACKERS_FOLDER benchmark/tracking/data/trackers \
---BENCHMARK CHIRLA_brief \
---SPLIT_TO_EVAL test \ 
---TRACKERS_TO_EVAL BoostTrack++ BoT-SORT-reid \
---METRICS CLEAR Identity
+	--GT_FOLDER benchmark/tracking/data/gt \
+	--TRACKERS_FOLDER benchmark/tracking/data/trackers \
+	--BENCHMARK $b \
+	--SPLIT_TO_EVAL test \
+	--TRACKERS_TO_EVAL ByteTrack BoT-SORT-reid \
+	--METRICS CLEAR Identity
+done
 ```
+
+Results are written to `<TRACKERS_FOLDER>/<benchmark>-test/<TrackerName>/pedestrian_summary.txt`.
 
 Notes:
-- Ensure `seqmaps/CHIRLA_all-{train,test}.txt` exist (created by step 1).
+- Seqmaps are read from `<GT_FOLDER>/seqmaps/<benchmark>-<split>.txt` (created by step 1).
 - Tracker outputs must be placed under:  
-  `<TRACKERS_FOLDER>/CHIRLA_{scenario/all}-{split}/<TrackerName>/data/<sequence>.txt`  
+  `<TRACKERS_FOLDER>/CHIRLA_{all,brief,multi}-{split}/<TrackerName>/data/<sequence>.txt`  
   with 10 MOT columns.
+
+## 5) Create the Leaderboard Entry
+Turn the TrackEval results of one tracker into a [leaderboard](https://bdager.github.io/CHIRLA/leaderboard.html#submit) entry:
+
+```bash
+python benchmark/export_leaderboard.py tracking \
+	--trackers-folder benchmark/tracking/data/trackers \
+	--tracker BoT-SORT-reid \
+	--method "BoT-SORT" --appearance "OSNet x0.25 (MSMT17)" --detector YOLO11n \
+	--out submission.json
+```
+
+It reads the three `pedestrian_summary.txt` files from step 4 and writes the entry in the leaderboard format.
 
 
 ### 📌 Baselines

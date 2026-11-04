@@ -160,7 +160,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert CHIRLA annotation JSON to MOT format with fixed train/test split for CHIRLA_all benchmark.")
     parser.add_argument("--input_dir", type=str, default="data/CHIRLA/annotations", help="Root annotations directory (contains seq_* folders)")
-    parser.add_argument("--output_dir", type=str, default="benchmark/tracking_MOT", help="Root output directory (will create CHIRLA_all-all)")
+    parser.add_argument("--output_dir", type=str, default="benchmark/tracking/data/gt", help="Root output directory (creates CHIRLA_all-train and CHIRLA_all-test)")
     parser.add_argument("--limit", type=int, default=None, help="Process only first N JSON files (debug)")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing txt outputs")
     parser.add_argument("--verbose", action="store_true", help="Verbose per-file logging")
