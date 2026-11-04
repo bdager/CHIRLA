@@ -16,6 +16,37 @@ Workflow summary:
 2. **Run evaluation** with the provided scripts.  
    See [Run Evaluation](#run-evaluation) for examples.
 
+## 🚀 Quick Start: From Your Model to a Leaderboard Entry
+
+**1. Save one HDF5 file per metadata CSV** (gallery and query of the four scenarios) with `save_embeddings`:
+
+```python
+import pandas as pd
+from check_embeddings import save_embeddings
+
+rows = pd.read_csv("../metadata/reid_long_term_query.csv")
+# embeddings = your model's features for rows["image_path"], in the same order
+save_embeddings("embeddings/mymethod/long_term_query_embeddings.h5",
+                embeddings,          # [N, D] features from your model
+                rows["id"],          # person IDs from the CSV
+                rows["image_path"])  # image paths from the CSV
+```
+
+**2. Check the files.** This compares each file with its CSV (all images present once, same IDs, no empty or NaN rows):
+
+```bash
+python check_embeddings.py embeddings/mymethod
+```
+
+**3. Evaluate and create the leaderboard entry** in one command:
+
+```bash
+python make_submission.py embeddings/mymethod \
+  --method "MyMethod (ResNet50)" --input 256x128 --pretrain MSMT17
+```
+
+It prints the results for the [submission form](https://github.com/bdager/CHIRLA/issues/new?template=submit-result.yml) and writes `evaluation_results.csv` and `submission.json`, the entry in the leaderboard format.
+
 
 
 ## 📊 Evaluation Metrics
