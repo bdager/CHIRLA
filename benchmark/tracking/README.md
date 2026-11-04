@@ -178,7 +178,7 @@ python benchmark/export_leaderboard.py tracking \
 	--out submission.json
 ```
 
-It reads the three `pedestrian_summary.txt` files from step 4 and writes the entry in the leaderboard format.
+It reads the three `pedestrian_summary.txt` files from step 4 and writes the entry in the leaderboard format. Paste its `results` into the [tracking submission form](https://github.com/bdager/CHIRLA/issues/new?template=submit-tracking.yml).
 
 
 ### 📌 Baselines

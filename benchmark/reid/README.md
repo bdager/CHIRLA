@@ -45,7 +45,7 @@ python make_submission.py embeddings/mymethod \
   --method "MyMethod (ResNet50)" --input 256x128 --pretrain MSMT17
 ```
 
-It prints the results for the [submission form](https://github.com/bdager/CHIRLA/issues/new?template=submit-result.yml) and writes `evaluation_results.csv` and `submission.json`, the entry in the leaderboard format.
+It prints the results for the [submission form](https://github.com/bdager/CHIRLA/issues/new?template=submit-reid.yml) and writes `evaluation_results.csv` and `submission.json`, the entry in the leaderboard format.
 
 
 

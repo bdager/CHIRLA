@@ -1,0 +1,85 @@
+name: Submit a tracking result
+description: Add your tracker's results on CHIRLA to the leaderboard.
+title: "[Leaderboard] Tracking: "
+labels: ["leaderboard"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for evaluating on CHIRLA! Please follow the protocol on the
+        [leaderboard page](https://bdager.github.io/CHIRLA/leaderboard.html#protocol).
+
+        Evaluate with TrackEval on CHIRLA_all, CHIRLA_brief and CHIRLA_multi, then run
+        [`export_leaderboard.py tracking`](https://github.com/bdager/CHIRLA/tree/main/benchmark/tracking#5-create-the-leaderboard-entry)
+        to get the results below in the right format.
+  - type: input
+    id: method
+    attributes:
+      label: Method name
+      description: As it should appear in the table, e.g. "BoT-SORT".
+    validations:
+      required: true
+  - type: input
+    id: detector
+    attributes:
+      label: Detector
+      placeholder: YOLO11n
+    validations:
+      required: true
+  - type: input
+    id: appearance
+    attributes:
+      label: Appearance model
+      description: Leave empty if the tracker uses motion only.
+      placeholder: OSNet x0.25 (MSMT17)
+  - type: input
+    id: paper
+    attributes:
+      label: Paper or preprint link
+      description: Leave empty only if you provide public code below.
+  - type: input
+    id: code
+    attributes:
+      label: Code link
+  - type: textarea
+    id: bibtex
+    attributes:
+      label: BibTeX
+      description: How people should cite your method.
+      render: bibtex
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: Tracker parameters and how they were tuned (only the two training sequences may be used).
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Test split. MOTA and IDF1 in percent, the rest as counts. This is the "results" object of the export_leaderboard.py output.
+      render: json
+      value: |
+        {
+          "all":                        {"mota": , "idf1": , "mt": , "ml": , "fn": , "fp": , "idsw": , "fm": },
+          "brief_occlusions":           {"mota": , "idf1": , "idsw": },
+          "multiple_people_occlusions": {"mota": , "idf1": , "idsw": }
+        }
+    validations:
+      required: true
+  - type: textarea
+    id: entry
+    attributes:
+      label: Leaderboard entry (optional)
+      description: Paste the full JSON written by export_leaderboard.py, it speeds up the review.
+      render: json
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I followed the CHIRLA benchmark protocol for this track.
+          required: true
+        - label: These results may be shown publicly on the CHIRLA leaderboard.
+          required: true

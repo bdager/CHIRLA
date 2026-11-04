@@ -1,0 +1,104 @@
+name: Submit a Re-ID result
+description: Add your Re-ID method's results on CHIRLA to the leaderboard.
+title: "[Leaderboard] Re-ID: "
+labels: ["leaderboard"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for evaluating on CHIRLA! Please follow the protocol on the
+        [leaderboard page](https://bdager.github.io/CHIRLA/leaderboard.html#protocol).
+
+        The easiest way to get the numbers in the right format is
+        [`make_submission.py`](https://github.com/bdager/CHIRLA/tree/main/benchmark/reid#-quick-start-from-your-model-to-a-leaderboard-entry):
+        it checks your embeddings, evaluates the four scenarios and prints the results box below.
+  - type: input
+    id: method
+    attributes:
+      label: Method name
+      description: As it should appear in the table, e.g. "MyMethod (ResNet50)".
+    validations:
+      required: true
+  - type: dropdown
+    id: track
+    attributes:
+      label: Track
+      options:
+        - Closed-set
+        - Open-set
+    validations:
+      required: true
+  - type: input
+    id: input_size
+    attributes:
+      label: Input size
+      placeholder: 256x128
+    validations:
+      required: true
+  - type: input
+    id: pretrain
+    attributes:
+      label: Pretraining data
+      placeholder: MSMT17
+  - type: dropdown
+    id: chirla_training
+    attributes:
+      label: Trained or fine-tuned on CHIRLA?
+      description: Only train_0 / test_0 may be used for this.
+      options:
+        - "No"
+        - Yes, on train_0 / test_0 only
+    validations:
+      required: true
+  - type: input
+    id: paper
+    attributes:
+      label: Paper or preprint link
+      description: Leave empty only if you provide public code below.
+  - type: input
+    id: code
+    attributes:
+      label: Code link
+  - type: textarea
+    id: bibtex
+    attributes:
+      label: BibTeX
+      description: How people should cite your method.
+      render: bibtex
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: Backbone, training recipe and anything else needed to reproduce the results.
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Percentages, averaged over subsets, excluding train_0/test_0. make_submission.py prints this block.
+      render: json
+      value: |
+        {
+          "long_term":              {"r1": , "r5": , "r10": , "map": },
+          "multi_camera_long_term": {"r1": , "r5": , "r10": , "map": },
+          "multi_camera":           {"r1": , "r5": , "r10": , "map": },
+          "reappearance":           {"r1": , "r5": , "r10": , "map": }
+        }
+    validations:
+      required: true
+  - type: textarea
+    id: entry
+    attributes:
+      label: Leaderboard entry (optional)
+      description: Paste the submission.json written by make_submission.py, it speeds up the review.
+      render: json
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I followed the CHIRLA benchmark protocol for this track.
+          required: true
+        - label: These results may be shown publicly on the CHIRLA leaderboard.
+          required: true

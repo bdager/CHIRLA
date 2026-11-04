@@ -148,6 +148,7 @@ table.lb .second { text-decoration: underline; text-decoration-color: var(--mute
 .card h3 i { color: var(--accent); margin-right: 0.4rem; }
 .card ul, .card ol { margin: 0; padding-left: 1.2rem; }
 .card li { margin: 0.3rem 0; font-size: 0.95rem; }
+.card pre { background: var(--bg); }
 code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.88em; }
 pre { background: var(--soft); border-radius: 6px; padding: 0.85rem 1rem; overflow-x: auto; font: 0.8rem/1.5 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; margin: 0.4rem 0 0; }
 
@@ -283,10 +284,29 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
     <p class="lead">Evaluated a method on CHIRLA? Add it to the leaderboard so others can compare against it and cite your work.</p>
     <div class="cols">
       <div class="card">
+        <h3><i class="fa-solid fa-user-check"></i>Re-ID: get your results</h3>
+        <p style="margin:0 0 0.4rem;font-size:0.95rem">Save your embeddings in the <a href="https://github.com/bdager/CHIRLA/tree/main/benchmark/reid#-quick-start-from-your-model-to-a-leaderboard-entry">benchmark format</a>, then check, evaluate and export them in one command:</p>
+<pre><code>cd benchmark/reid
+python make_submission.py embeddings/mymethod \
+  --method "MyMethod (ResNet50)" \
+  --input 256x128 --pretrain MSMT17</code></pre>
+      </div>
+      <div class="card">
+        <h3><i class="fa-solid fa-route"></i>Tracking: get your results</h3>
+        <p style="margin:0 0 0.4rem;font-size:0.95rem">Evaluate with <a href="https://github.com/bdager/CHIRLA/tree/main/benchmark/tracking#4-evaluate-with-trackeval">TrackEval</a> on CHIRLA_all, CHIRLA_brief and CHIRLA_multi, then export the results:</p>
+<pre><code>python benchmark/export_leaderboard.py tracking \
+  --trackers-folder benchmark/tracking/data/trackers \
+  --tracker MyTracker --method "MyTracker" \
+  --detector YOLO11n --out submission.json</code></pre>
+      </div>
+    </div>
+    <p class="narrow" style="font-size:0.92rem;color:var(--muted);margin:0.75rem auto 1.25rem">Both write <code>submission.json</code>, your entry in the leaderboard format. Copy its <code>results</code> into the form, or the whole entry into a pull request.</p>
+    <div class="cols">
+      <div class="card">
         <h3><i class="fa-solid fa-file-circle-plus"></i>Option 1: submission form</h3>
         <ol>
           <li>Run your method following the protocol above.</li>
-          <li>Open the <a href="https://github.com/bdager/CHIRLA/issues/new?template=submit-result.yml">submission form</a> on GitHub.</li>
+          <li>Open the <a href="https://github.com/bdager/CHIRLA/issues/new?template=submit-reid.yml">Re-ID form</a> or the <a href="https://github.com/bdager/CHIRLA/issues/new?template=submit-tracking.yml">tracking form</a> on GitHub.</li>
           <li>Fill in the method, setup, results, and a link to your paper or code, plus its BibTeX.</li>
         </ol>
         <p style="margin:0.6rem 0 0;font-size:0.92rem">We review each submission and add it, usually within a week.</p>
@@ -294,7 +314,7 @@ footer p { max-width: 760px; margin: 0 auto 0.6rem; text-align: center; }
       <div class="card">
         <h3><i class="fa-solid fa-code-pull-request"></i>Option 2: pull request</h3>
         <ol>
-          <li>Add your entry to <a href="https://github.com/bdager/CHIRLA/blob/main/docs/leaderboard/results.json"><code>docs/leaderboard/results.json</code></a>, and your paper under <code>papers</code>.</li>
+          <li>Add your entry (the contents of <code>submission.json</code>) to <a href="https://github.com/bdager/CHIRLA/blob/main/docs/leaderboard/results.json"><code>docs/leaderboard/results.json</code></a>, and your paper under <code>papers</code>.</li>
           <li>Run <code>python tools/validate_results.py</code> to check the format.</li>
           <li>Open a pull request; the same check runs automatically.</li>
         </ol>
