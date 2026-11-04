@@ -1,5 +1,10 @@
 # 📈 Tracking Benchmark Guide
 
+[![Leaderboard](https://img.shields.io/badge/%F0%9F%8F%86-Leaderboard-orange)](https://bdager.github.io/CHIRLA/leaderboard.html#tracking)
+[![arXiv](https://img.shields.io/badge/%F0%9F%93%84%20ArXiv-2502.06681-b31b1b.svg)](https://arxiv.org/abs/2502.06681)
+
+🏆 **[Tracking leaderboard](https://bdager.github.io/CHIRLA/leaderboard.html#tracking)**: compare results of all evaluated trackers and submit your own.
+
 This repository contains scripts to:
 - Prepare CHIRLA ground truth (GT) in MOT format
 - Run trackers over videos
@@ -50,7 +55,7 @@ Outputs:
 ## 2) Run tracking over videos (write MOT results)
 We provide scripts to run trackers via [boxmot](https://github.com/mikel-brostrom/boxmot) with YOLO as detector:  
 
-Supported trackers: [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack?utm_source=chatgpt.com), [BoostTrack+](https://github.com/vukasin-stanojevic/BoostTrack), [BoostTrack++](https://github.com/vukasin-stanojevic/BoostTrack?utm_source=chatgpt.com), [BoT-SORT](https://github.com/NirAharon/BoT-SORT), [ByteTrack](https://github.com/FoundationVision/ByteTrack), [OC-SORT](https://github.com/noahcao/OC_SORT), [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT).
+Supported trackers: [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack), [BoostTrack+](https://github.com/vukasin-stanojevic/BoostTrack), [BoostTrack++](https://github.com/vukasin-stanojevic/BoostTrack), [BoT-SORT](https://github.com/NirAharon/BoT-SORT), [ByteTrack](https://github.com/FoundationVision/ByteTrack), [OC-SORT](https://github.com/noahcao/OC_SORT), [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT).
 
 <!-- ### Supported Trackers
 - [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack) –  *Boosting the similarity measure and detection confidence for improved multiple object tracking*   [Paper (Springer, 2024)](https://link.springer.com/article/10.1007/s00138-024-01531-5)
@@ -82,7 +87,7 @@ python benchmark/tracking/tracker_botmox_all_videos.py \
 Tracker name format (CLI): boosttrack, boosttrack+, boosttrack++, strongsort, ocsort, deepocsort, bytetrack, botsort.
 
 ### Appearance-based Trackers
-For trackers with ReID support ([BoostTrack+](https://github.com/vukasin-stanojevic/BoostTrack), [BoostTrack++](https://github.com/vukasin-stanojevic/BoostTrack?utm_source=chatgpt.com), [BoT-SORT](https://github.com/NirAharon/BoT-SORT),  [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT)), enable `--with-reid` and specify weights:
+For trackers with ReID support ([BoostTrack+](https://github.com/vukasin-stanojevic/BoostTrack), [BoostTrack++](https://github.com/vukasin-stanojevic/BoostTrack), [BoT-SORT](https://github.com/NirAharon/BoT-SORT),  [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT)), enable `--with-reid` and specify weights:
 
 ```bash
 python benchmark/tracking/tracker_botmox_all_videos.py \
@@ -147,4 +152,4 @@ Results of all evaluated methods, including the baselines from our paper, are on
 For the baseline configurations, see our [paper](https://arxiv.org/pdf/2502.06681).
 
 ## 🙏 Acknowledgements
-We thank the open-source community and tools that made this benchmark possible:   [boxmot](https://github.com/mikel-brostrom/boxmot), [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack?utm_source=chatgpt.com),  [BoT-SORT](https://github.com/NirAharon/BoT-SORT), [ByteTrack](https://github.com/FoundationVision/ByteTrack), [OC-SORT](https://github.com/noahcao/OC_SORT), [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT), [TrackEval](https://github.com/JonathonLuiten/TrackEval).
+We thank the open-source community and tools that made this benchmark possible:   [boxmot](https://github.com/mikel-brostrom/boxmot), [BoostTrack](https://github.com/vukasin-stanojevic/BoostTrack),  [BoT-SORT](https://github.com/NirAharon/BoT-SORT), [ByteTrack](https://github.com/FoundationVision/ByteTrack), [OC-SORT](https://github.com/noahcao/OC_SORT), [Deep-OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT), [StrongSORT](https://github.com/dyhBUPT/StrongSORT), [TrackEval](https://github.com/JonathonLuiten/TrackEval).

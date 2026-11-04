@@ -1,5 +1,10 @@
 # 📈  Re-ID Benchmark Guide
 
+[![Leaderboard](https://img.shields.io/badge/%F0%9F%8F%86-Leaderboard-orange)](https://bdager.github.io/CHIRLA/leaderboard.html#reid)
+[![arXiv](https://img.shields.io/badge/%F0%9F%93%84%20ArXiv-2502.06681-b31b1b.svg)](https://arxiv.org/abs/2502.06681)
+
+🏆 **[Re-ID leaderboard](https://bdager.github.io/CHIRLA/leaderboard.html#reid)**: compare results of all evaluated methods and submit your own.
+
 Workflow summary:
 
 1. **Create embeddings** for gallery and query sets, and store them in [HDF5 format](#hdf5-format) with the following folder convention:
@@ -152,4 +157,4 @@ For the experimental settings of the baselines, please refer to our [paper](http
 
 ## 🙏 Acknowledgements
 
-We thank the great works and open-source repositories: [CION_ReIDZoo](https://github.com/Zplusdragon/CION_ReIDZoo), [FastReID](https://github.com/JDAI-CV/fast-reid) and [Centroids-ReID](https://github.com/mikwieczorek/centroids-reid).
+We thank the great works and open-source repositories: [CION_ReIDZoo](https://github.com/Zplusdragon/CION_ReIDZoo), [FastReID](https://github.com/JDAI-CV/fast-reid), [Centroids-ReID](https://github.com/mikwieczorek/centroids-reid), [DIFFER](https://github.com/xliangp/DIFFER) and [SapiensID](https://github.com/mk-minchul/sapiensid).
