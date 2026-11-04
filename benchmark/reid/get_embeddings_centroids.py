@@ -228,16 +228,20 @@ def run_embedding_extraction(input_dir, output_dir, config_file,
             logger.error(f"Stderr:\n{e.stderr.strip()[:1000]}")
         return False
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Extract embeddings for CHIRLA benchmark using centroids-reid and CSV metadata")
-    parser.add_argument("--metadata-dir", 
-                       default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/metadata",
+    parser.add_argument("--metadata-dir",
+                       default=os.path.join(REPO_ROOT, "benchmark", "metadata"),
                        help="Directory containing CSV metadata files")
-    parser.add_argument("--data-root", 
-                       default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/data/CHIRLA/benchmark",
+    parser.add_argument("--data-root",
+                       default=os.path.join(REPO_ROOT, "data", "CHIRLA", "benchmark"),
                        help="Root directory of CHIRLA benchmark data")
-    parser.add_argument("--output-root", 
-                       default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/centroids_reid",
+    parser.add_argument("--output-root",
+                       default=os.path.join(SCRIPT_DIR, "embeddings", "centroids_reid"),
                        help="Root directory for output embeddings")
     parser.add_argument("--config-file", 
                        default="configs/256_resnet50.yml",
@@ -252,7 +256,7 @@ def main():
     parser.add_argument("--csv-files", nargs="+", default=None,
                        help="Specific CSV files to process (if None, process all)")
     parser.add_argument("--centroids_dir",
-        default="/home/bdager/Dropbox/work/phd/rebuttal_2/centroids-reid",
+        default=os.path.join(SCRIPT_DIR, "models", "centroids-reid"),
         help="centroids-reid repository path")
     parser.add_argument("--exclude-val", action="store_true",
                        help="Exclude validation files (*_val.csv)")
@@ -262,8 +266,11 @@ def main():
         help="Skip files that have already been processed (HDF5 file exists)")
     
     args = parser.parse_args()
-    
-    # Ensure we're in the right directory    
+    # Absolute paths, centroids-reid runs from its own directory
+    for name in ("metadata_dir", "data_root", "output_root"):
+        setattr(args, name, os.path.abspath(getattr(args, name)))
+
+    # Ensure we're in the right directory
     centroids_reid_repo = os.path.abspath(args.centroids_dir)
     if centroids_reid_repo not in sys.path:
         sys.path.insert(0, centroids_reid_repo)

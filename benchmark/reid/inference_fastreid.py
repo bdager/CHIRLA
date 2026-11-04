@@ -4,12 +4,20 @@ import numpy as np
 from PIL import Image
 import argparse
 import os
+import sys
+
+DEFAULT_MODEL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "fast-reid")
 
 class FastReIDModel:
-    def __init__(self, 
+    def __init__(self,
             config_file="configs/Market1501/bagtricks_R101-ibn.yml",
             cktp="checkpoints/market_bot_R101-ibn.pth",
-            model_dir="/home/bdager/Dropbox/work/phd/rebuttal_2/fast-reid"):
+            model_dir=None):
+        model_dir = os.path.abspath(model_dir or DEFAULT_MODEL_DIR)
+        if not os.path.isdir(model_dir):
+            raise FileNotFoundError(f"fast-reid repository not found at {model_dir}, clone it there or pass its path")
+        if model_dir not in sys.path:
+            sys.path.insert(0, model_dir)
         # Change to fast-reid directory for proper relative paths
         os.chdir(model_dir)
         from fastreid.config import get_cfg

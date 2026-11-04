@@ -8,7 +8,7 @@ fastreid   FastReID (https://github.com/JDAI-CV/fast-reid), see inference_fastre
 differ     DIFFER (https://github.com/xliangp/DIFFER)
 sapiensid  SapiensID (https://github.com/mk-minchul/sapiensid)
 
-DIFFER and SapiensID are used from a local clone of their repositories, by default models/DIFFER and models/sapiensid next to this script (override with --repo-dir).
+All three are used from a local clone of their repositories, by default models/fast-reid, models/DIFFER and models/sapiensid next to this script (override with --repo-dir).
 See README.md for the setup.
 
 HDF5 output layout:
@@ -40,6 +40,7 @@ import h5py
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_REPO_DIRS = {
+    "fastreid": os.path.join(SCRIPT_DIR, "models", "fast-reid"),
     "differ": os.path.join(SCRIPT_DIR, "models", "DIFFER"),
     "sapiensid": os.path.join(SCRIPT_DIR, "models", "sapiensid"),
 }
@@ -67,7 +68,8 @@ def load_model(model_name="fastreid", config_file=None, checkpoint_file=None, de
     """
     if model_name == "fastreid":
         from inference_fastreid import FastReIDModel
-        model = FastReIDModel(config_file=config_file, cktp=checkpoint_file)
+        model = FastReIDModel(config_file=config_file, cktp=checkpoint_file,
+                              model_dir=repo_dir or DEFAULT_REPO_DIRS["fastreid"])
         return model, 2048  # embedding dimension
     elif model_name == "differ":
         model = DIFFERModel(config_file, checkpoint_file, device=device,
@@ -187,6 +189,9 @@ def extract_embeddings(csv_path, input_dir, output_dir,
                     cfg_file="configs/Market1501/bagtricks_R101-ibn.yml",
                     cktp_file="checkpoints/market_bot_R101-ibn.pth",
                     batch_size=32, device="cuda", repo_dir=None):
+    # Absolute paths, FastReID changes the working directory when it loads
+    input_dir = os.path.abspath(input_dir)
+    output_dir = os.path.abspath(output_dir)
     df = pd.read_csv(csv_path)
     rel_paths = df["image_path"].tolist()
     image_paths = [os.path.join(input_dir, path) for path in rel_paths]
@@ -292,8 +297,8 @@ if __name__ == "__main__":
             help="[fastreid, differ] Path to checkpoint file. "
                  "[sapiensid] Checkpoint folder with model.yaml and model.pth")
     parser.add_argument("--repo-dir", default=None,
-            help="[differ, sapiensid] Local clone of the model's repository "
-                 "(default: models/DIFFER or models/sapiensid next to this script)")
+            help="Local clone of the model's repository "
+                 "(default: models/fast-reid, models/DIFFER or models/sapiensid next to this script)")
     parser.add_argument("--device", default="cuda", help="Device for model inference (cuda or cpu)")
 
     args = parser.parse_args()

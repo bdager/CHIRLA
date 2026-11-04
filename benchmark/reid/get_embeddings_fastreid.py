@@ -76,19 +76,23 @@ def filter_csv_files(csv_files, exclude_val=False, exclude_train=False):
     return filtered_files
 
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate FastReID embeddings for CHIRLA benchmark metadata")
-    parser.add_argument("--input-dir", 
-                        default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/data/CHIRLA/benchmark",
+    parser.add_argument("--input-dir",
+                        default=os.path.join(REPO_ROOT, "data", "CHIRLA", "benchmark"),
                         help="Input directory containing the CHIRLA benchmark data")
-    parser.add_argument("--output-dir", 
-                        default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/fastreid",
+    parser.add_argument("--output-dir",
+                        default=os.path.join(SCRIPT_DIR, "embeddings", "fastreid"),
                         help="Output directory for embeddings")
-    parser.add_argument("--metadata-dir", 
-                        default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/metadata",
+    parser.add_argument("--metadata-dir",
+                        default=os.path.join(REPO_ROOT, "benchmark", "metadata"),
                         help="Directory containing metadata CSV files")
-    parser.add_argument("--fastreid-dir", 
-                        default="/home/bdager/Dropbox/work/phd/rebuttal_2/fast-reid",
+    parser.add_argument("--fastreid-dir",
+                        default=os.path.join(SCRIPT_DIR, "models", "fast-reid"),
                         help="FastReID repository directory")
     parser.add_argument("--batch-size", type=int, default=8,
                         help="Batch size for embedding extraction")
@@ -105,6 +109,9 @@ def main():
     parser.add_argument("--skip", action="store_true", help="Skip CSV/model pairs whose embedding file already exists")
     
     args = parser.parse_args()
+    # Absolute paths, the script changes into the fast-reid directory later
+    for name in ("input_dir", "output_dir", "metadata_dir", "fastreid_dir"):
+        setattr(args, name, os.path.abspath(getattr(args, name)))
 
     # Ensure fast-reid repo is on sys.path BEFORE importing create_embeddings / fastreid
     fastreid_repo = os.path.abspath(args.fastreid_dir)
@@ -234,7 +241,8 @@ def main():
                         cfg_file=config_file,
                         cktp_file=checkpoint_file,
                         batch_size=args.batch_size,
-                        device=args.device
+                        device=args.device,
+                        repo_dir=args.fastreid_dir
                     )
                     print(f"✅ Successfully processed {csv_name} with {model_name}")
                     total_processed += 1

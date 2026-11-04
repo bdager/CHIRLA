@@ -479,14 +479,16 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="CION ReID - CSV embedding extractor")
     ap.add_argument("--csv", default=None, help="Path to a single metadata CSV. If omitted, process all CSVs in --metadata-dir")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.abspath(os.path.join(script_dir, "..", ".."))
     ap.add_argument("--input-dir",
-        default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/data/CHIRLA/benchmark",
+        default=os.path.join(repo_root, "data", "CHIRLA", "benchmark"),
         help="Root dir for relative image paths in CSV")
     ap.add_argument("--output-dir",
-        default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark",
-        help="Root directory to save per-model *_embeddings.h5")
+        default=os.path.join(script_dir, "embeddings"),
+        help="Root directory to save per-model *_embeddings.h5 (written under CION/<model>)")
     ap.add_argument("--metadata-dir",
-        default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/metadata",
+        default=os.path.join(repo_root, "benchmark", "metadata"),
         help="Directory containing metadata CSV files (used when --csv is not provided)")
 
     # Model selection (like get_embeddings_fastreid)
@@ -495,14 +497,14 @@ if __name__ == "__main__":
         default=["all"],
         help="Which CION models to run. 'custom' uses --model/--ckpt; 'all' loads all presets present in --models-dir")
     ap.add_argument("--models-dir",
-        default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/models/cion",
+        default=os.path.join(script_dir, "models", "cion"),
         help="Directory containing CION checkpoints (.pth) for presets")
 
     # Custom single-model args (used when --models includes 'custom')
     ap.add_argument("--model", default="convnext_base",
                     help="timm model name matching the CION checkpoint (e.g. resnet50, resnet50d, resnet50_ibn, convnext_base)")
     ap.add_argument("--ckpt",
-        default="/home/bdager/Dropbox/work/phd/rebuttal_2/CHIRLA/benchmark/models/ConvNext_Base_teacher.pth",
+        default=os.path.join(script_dir, "models", "cion", "ConvNext_Base_teacher.pth"),
         help="Path to CION checkpoint .pth")
 
     # Runtime and filters
