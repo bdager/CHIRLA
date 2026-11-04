@@ -471,13 +471,15 @@ if __name__ == "__main__":
     parser.add_argument("--query", required=True, help="Path to query HDF5 (test embeddings)")
     parser.add_argument("--topk", nargs="+", type=int, default=[1,5,10], help="Top-k values for CMC")
     parser.add_argument("--visualize", action="store_true", help="Show query and top-k gallery matches")
-    parser.add_argument("--per-subset", action="store_true", help="Evaluate per subset and average results")
+    parser.add_argument("--per-subset", action=argparse.BooleanOptionalAction, default=True,
+        help="Evaluate each test_k against train_k and average, as the benchmark protocol does (default: on). "
+             "--no-per-subset scores all queries against the whole gallery, not comparable with the leaderboard")
     parser.add_argument("--open-map-threshold", dest="open_map_threshold", 
         type=float, default=None, help="Similarity threshold applied when computing mAP for open-set evaluation (no effect on CMC or closed-set mAP)")
     parser.add_argument("--no-show-logs", action="store_false", help="Show detailed logs during evaluation")
     parser.add_argument("--out-csv", default=None,
         help="Save the ranked gallery of every query to this CSV (query_path, query_id, gallery_path, "
-             "gallery_id, rank, score). With --per-subset, <name>_test_N.csv files are written as well.")
+             "gallery_id, rank, score). Per subset, <name>_test_N.csv files are written as well.")
     parser.add_argument("--save-topk", type=int, default=None,
         help="Ranks to keep per query in --out-csv (default: the full ranking)")
     parser.add_argument("--data-root", default="",

@@ -130,10 +130,10 @@ python create_embeddings.py \
 We provide flexible evaluation scripts supporting different evaluation modes.
 
 #### Per-Subset Evaluation
-Report averaged metrics over all `train_k` / `test_k` subset pairs of specific gallery and query files:
+Report averaged metrics over all `train_k` / `test_k` subset pairs of specific gallery and query files. This is the benchmark protocol and is on by default (`--no-per-subset` turns it off, but those results are not comparable with the leaderboard):
 
 ```bash
-python evaluate_reid.py     --gallery embeddings/gallery_embeddings.h5     --query embeddings/query_embeddings.h5     --topk 1 5 10     --per-subset
+python evaluate_reid.py     --gallery embeddings/gallery_embeddings.h5     --query embeddings/query_embeddings.h5     --topk 1 5 10
 ```
 
 Add `--out-csv results.csv` to also save each query's ranked gallery (`results_test_k.csv` per subset plus `results.csv` with all of them; `--save-topk N` keeps only the top N). `--visualize` needs `--data-root <CHIRLA>/benchmark`, since the HDF5 paths are relative.
